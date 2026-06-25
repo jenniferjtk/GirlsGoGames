@@ -20,7 +20,7 @@ Final Decision:
 This analysis was extremely helpful for deciding which applciation to use as a basis for ReadRight2.0
 
 
-## Entry 2 Claude (June 21, 2026)
+## Entry 2 - Analyzing Architecture of Candidate 1 (tool:Claude) (June 21, 2026)
 
 Context
 
@@ -46,7 +46,7 @@ Testing and Verification
 
 We opened practice.dart and confirmed the feedback field is hardcoded to "Good job" regardless of score. We opened feedback.dart and confirmed the hardcoded word, score, and phoneme chips. We opened pubspec.yaml and confirmed mockito under dependencies and three unused Firebase packages listed despite Firebase never being used.
 
-## Entry 3 ChatGPT (June 22, 2026) 
+## Entry 3 Educational Effectiveness of Candiadte 1 ([06/22/26],tool:ChatGPT) 
 
 Context
 We were evaluating the educational effectiveness of the WitherTigher codebase to determine whether it actually teaches children to read or just drills them on words.
@@ -96,3 +96,38 @@ Final Decision:
 We decided that because of this important limitation, candidate 2 was not a great choice to use for 
 ReadRight2.0. 
 
+
+# Entry 5: Understanding Architecure Candidate 5 (tool: ChatGPT. 6/23/26) [Karina]
+Context:
+Understand the architecture, structure, and quality of a Flutter app  and assess whether it is scalable or would require major refactoring.
+
+Prompt Excerpt:
+Based on this code, give me the rough architecture of this project. what are strengths? what can be improved? non-goal = writing new code or trying to fix it
+
+AI Summary:
+The AI described the app as a Provider-based Flutter architecture with global state management (Session, Users, Recording), centralized routing, and dotenv configuration. It identified strengths like simplicity, clean separation of domains, and consistent state patterns, but flagged weaknesses such as likely fat providers, missing service/repository layers, and potential scalability issues in speech/recording logic.
+
+Human Evaluation:
+Accurate high-level architectural breakdown. The identification of domain separation and global state usage matches the code structure. 
+
+Final Decision:
+The response aligned with the project's overview and provided observations without trying to fix the code. Decided to go back and ask for clarification and line numbers.
+
+Testing / Verification — how you confirmed the conclusion.
+Cross-checked the main() file: confirmed MultiProvider setup, presence of SessionProvider, RecordingProvider, and AllUsersProvider, and centralized routing via MaterialApp.
+
+# Entry 6: Candidate 5 Review (tool: Gemini. 6/23/26) [Karina]
+Context:
+Understand the architecture, structure, and quality of a Flutter app  and assess whether it is scalable or would require major refactoring.
+
+Prompt Excerpt: 
+Asked the AI to impersonate a master flutter engineer with the goal to grade the code 1-5 based on it's quality, strengths, weaknesses, efficitivness, etc.
+
+AI Summary:
+Rated the code a 3.5/5.Suggested transitioning to a service-repository pattern to maintain scalability. Considered the providers bloated.
+
+Human Evalution:
+The feedback accurately identifies the trade-off between current simplicity and future technical debt.Feedback also pointed out some missed items like losing the benefits of lazy loading.
+
+Verification:
+Verfied by reviewing main.dart against Flutter's best practices. Suggested were cross referenced against other candidates.
