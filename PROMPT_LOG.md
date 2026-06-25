@@ -71,3 +71,28 @@ Testing and Verification
 
 We confirmed no spaced repetition logic exists anywhere in the codebase by searching for relevant terms across all service files. We confirmed the always "Good job" feedback string in practice.dart. We confirmed Azure returns phoneme level data by reviewing the AssessmentResult model and noting it is never passed to feedback.dart.
 
+## ENTRY 4: Candidate 2 Pronounciation Question (June 23, 2026, ChatGPT)
+
+Context: 
+Determining whether speech-to-text is a sufficent way to gauge student pronunciation for the 
+dolch words.
+
+Prompt:
+"Is using speech to text alone a good way to evaluate pronunciation? Explain the advantages and 
+disadvantages compared to a dedicated pronunciation assessment."
+
+AI Summary:
+The AI explained that speech to text can determine when a word is said correctly, but does not 
+accurately determine pronunciation quality. The AI also explained that a poorly pronounced word 
+could be marked correctly because of context or the pronunciation being "close enough", which could
+stunt learning. It reccomended using a service such as Azure Pronunciation Assessment for a more 
+accurate learning experience.
+
+Human Evaluation:
+This response alligned with the project and provided useful information in the decision making 
+process for which candidate to choose. 
+
+Final Decision: 
+We decided that because of this important limitation, candidate 2 was not a great choice to use for 
+ReadRight2.0. 
+
