@@ -3,8 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:readright/config/config.dart';
 import 'package:readright/widgets/student_base_scaffold.dart';
-import 'package:readright/models/word.dart' hide Attempt;
-import 'package:readright/models/attempt.dart';
+import 'package:readright/models/word.dart';
 import 'package:http/http.dart' as http;
 import 'package:permission_handler/permission_handler.dart';
 import 'package:path_provider/path_provider.dart';
@@ -31,9 +30,7 @@ class _PracticePageState extends State<PracticePage> {
   final FlutterTts textspeech = FlutterTts();
   bool _isRecording = false;
   bool _micIsReady = false;
-  bool _loading = true;
   bool _hasPermission = false;
-  String? _error;
 
   int _countdown = 0;
   int sentloop = 0;
@@ -70,7 +67,6 @@ class _PracticePageState extends State<PracticePage> {
     if (!widget.skipLoad) {
       _loadNextWord();
     } else {
-      _loading = false;
       _currentWord = Word(id: "test", text: "cat", type: "word", sentences: []);
     }
   }
@@ -378,37 +374,28 @@ class _PracticePageState extends State<PracticePage> {
     _previousWord = _currentWord;
 
     if (widget.testMode) {
-      _loading = false;
       _currentWord = Word(id: "test", text: "cat", type: "word", sentences: []);
       setState(() {});
       return;
     }
 
     _assessmentResult = null;
-    _error = null;
-    _loading = true;
     setState(() {});
 
     final user = Supabase.instance.client.auth.currentUser;
     if (user == null) {
-      _error = 'User not logged in.';
-      _loading = false;
       setState(() {});
       return;
     }
 
     final listRecord = await _fetchCurrentListRecord(user.id);
     if (listRecord == null) {
-      _error = 'All Dolch Lists Complete';
-      _loading = false;
       setState(() {});
       return;
     }
 
     final listId = listRecord['list_id'] as String?;
     if (listId == null) {
-      _error = 'All Dolch Lists Complete';
-      _loading = false;
       setState(() {});
       return;
     }
@@ -416,7 +403,6 @@ class _PracticePageState extends State<PracticePage> {
     final nextWord = await _fetchUnmasteredWord(user.id, listId);
     if (nextWord == null) {
       _alphabeticalNextList = true;
-      _loading = false;
       if (!_popupShown) {
         _popupShown = true;
         _showListPopup();
@@ -442,7 +428,6 @@ class _PracticePageState extends State<PracticePage> {
 
     _currentWord = newWord;
 
-    _loading = false;
     setState(() {});
   }
 
@@ -483,7 +468,7 @@ class _PracticePageState extends State<PracticePage> {
 
     record.onAmplitudeChanged(const Duration(milliseconds: 100)).listen(
           (amp) async {
-        if (!_micIsReady && amp.current != null) {
+        if (!_micIsReady) {
           _micIsReady = true;
 
           // setState(() {
@@ -532,6 +517,8 @@ class _PracticePageState extends State<PracticePage> {
       };
       final configBase64 =
       base64.encode(utf8.encode(json.encode(configJson)));
+
+      //AZURE REQUESTS
 
       final url = Uri.parse(
         "https://eastus2.stt.speech.microsoft.com/speech/recognition/conversation/cognitiveservices/v1?language=en-US",

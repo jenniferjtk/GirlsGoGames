@@ -25,7 +25,6 @@ class _SignUpPageState extends State<SignUpPage> {
   List<Map<String, dynamic>> _classes = [];
   String? _selectedClassId;
   bool _loadingClasses = true;
-  String? _classError;
 
   @override
   void initState() {
@@ -48,7 +47,6 @@ class _SignUpPageState extends State<SignUpPage> {
       });
     } catch (e) {
       setState(() {
-        _classError = "Failed to load classes";
         _loadingClasses = false;
       });
     }

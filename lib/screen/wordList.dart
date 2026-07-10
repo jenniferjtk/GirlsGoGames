@@ -173,28 +173,6 @@ class _WordListPageState extends State<WordListPage> {
   }
 
 
-  Widget _buildWordItem(Word word) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 10.0),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-        decoration: BoxDecoration(
-          color: Color(AppConfig.primaryColor).withOpacity(0.1),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Color(AppConfig.primaryColor), width: 2),
-        ),
-        child: Text(
-          word.text,
-          style: const TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-            color: Color(0xFF2D3748),
-          ),
-        ),
-      ),
-    );
-  }
-
   Widget _buildButtons(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0),

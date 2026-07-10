@@ -32,8 +32,8 @@ Future<void> main() async {
   await dotenv.load(fileName: ".env");
   WidgetsFlutterBinding.ensureInitialized();
 
-  const supabaseUrl = AppConfig.supabaseUrl;
-  const supabaseAnonKey = AppConfig.supabaseAnonKey;
+final supabaseUrl = AppConfig.supabaseUrl;
+final supabaseAnonKey = AppConfig.supabaseAnonKey;
 
   MediaKit.ensureInitialized();
 

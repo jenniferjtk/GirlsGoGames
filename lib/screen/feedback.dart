@@ -64,6 +64,8 @@ class FeedbackPage extends StatelessWidget {
               color: Color(AppConfig.primaryColor),
             ),
           ),
+
+          //HARDOCDED TEXT
           const SizedBox(height: 16),
           const Text(
             'cat',

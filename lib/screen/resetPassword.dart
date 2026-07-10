@@ -1,4 +1,3 @@
-import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
 import 'package:readright/config/config.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -35,14 +34,6 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
 
     try {
       final supabase = Supabase.instance.client;
-
-      // Dynamic redirect URL for all platforms
-      final redirectUrl = Platform.isAndroid ||
-          Platform.isIOS ||
-          Platform.isWindows ||
-          Platform.isMacOS
-          ? 'io.readright.app://reset'
-          : 'https://readright-f4e36.web.app/reset';
 
       await supabase.auth.resetPasswordForEmail(email);
 

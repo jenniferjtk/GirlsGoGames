@@ -1,5 +1,4 @@
 import 'package:csv/csv.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter/services.dart' show rootBundle;
 
@@ -357,7 +356,7 @@ class DatabaseHelper {
         .filter('user_id', 'in', '($idList)')
         .order('score', ascending: true);
 
-    if (res == null || res.isEmpty) return [];
+    if (res.isEmpty) return [];
 
     final Map<String, List<num>> scoresByWord = {};
 
