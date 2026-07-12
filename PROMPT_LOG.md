@@ -131,3 +131,45 @@ The feedback accurately identifies the trade-off between current simplicity and 
 
 Verification:
 Verfied by reviewing main.dart against Flutter's best practices. Suggested were cross referenced against other candidates.
+
+
+
+# Entry 7: Backend Proxy Creation (tool: ChatGPT 7/11/26) [Kathleen]
+Context:
+Build a secure backend proxy for the AI Story Builder that keeps the OpenAI API key out of the Flutter app and follows the project requirements.
+
+Prompt Excerpt:
+I need to build the backend proxy for my part of the project, but I've never done this before. Can you explain what a backend proxy is, what files I need to create, and help me build an Express server that stores the OpenAI key in a local .env file and exposes a /generate-story endpoint that my Flutter app can call?
+
+AI Summary:
+The AI explained how a backend proxy works, suggested using Express with a .env file, and provided the basic server structure with a /generate-story endpoint that forwards requests to OpenAI.
+
+Human Evaluation:
+The overall setup matched what our professor wanted, but the AI included a temperature parameter that the required model didn't support. After removing it, everything worked correctly.
+
+Final Decision:
+Accepted with a small change. We kept the backend setup but removed the unsupported parameter.
+
+Testing / Verification:
+Started the backend, tested the /health endpoint, then sent a test prompt to /generate-story and confirmed it returned a story.
+
+
+
+# Entry #8: Flutter Connection to Backend Proxy (tool: ChatGPT, 7/11/26) [Kathleen]
+Context:
+Create a Flutter page that connects to the backend proxy and displays the generated story without repeatedly calling the API.
+
+Prompt Excerpt:
+Help me build a simple AI Story Builder page in Flutter that has a text box, a Generate Story button, and displays the returned story. I also want to make sure it only sends one request when the button is pressed and doesn't accidentally make repeated API calls every time the screen refreshes.
+
+AI Summary:
+The AI suggested creating a new screen with a text field, a button, and an HTTP POST request to the backend. It also recommended only calling the backend inside the button's onPressed function so requests would only be made intentionally.
+
+Human Evaluation:
+The design was simple, which was fine since Milestone 2 only requires proving the AI path works. It also only sends a request when the button is pressed, so it won't accidentally make repeated API calls.
+
+Final Decision:
+Accepted. The page was added with only small changes to match the existing app.
+
+Testing / Verification:
+Opened the Story Builder page, submitted a Dolch word prompt, and confirmed the generated story was returned and displayed correctly.
