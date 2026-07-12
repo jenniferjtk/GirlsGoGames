@@ -61,18 +61,30 @@ class StudentDashboardProvider extends ChangeNotifier {
 
   // Load user info (uses current_list_int)
   Future<void> _loadUserInfo(String userId) async {
-    final res = await client!
+    final userRes = await client!
         .from('users')
-        .select('id, first_name, last_name, email, current_list_int, class_id, classes(name)')
+        .select('id, first_name, last_name, email, current_list_int, class_id')
         .eq('id', userId)
         .maybeSingle();
 
-    if (res == null) throw Exception("User not found");
+    if (userRes == null) throw Exception("User not found");
 
-    // Flatten the class name so UI can read it easily
+    String? className;
+
+    final classId = userRes['class_id'];
+    if (classId != null) {
+      final classRes = await client!
+          .from('classes')
+          .select('name')
+          .eq('id', classId)
+          .maybeSingle();
+
+      className = classRes?['name'] as String?;
+    }
+
     userInfo = {
-      ...res,
-      'class_name': res['classes']?['name'],
+      ...userRes,
+      'class_name': className ?? 'N/A',
     };
   }
 
