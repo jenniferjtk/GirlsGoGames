@@ -314,32 +314,38 @@ class TeacherProvider extends ChangeNotifier {
 
       final classId = classRow['id'];
 
-      final res = await supabase.functions.invoke(
-        'create_student',
-        body: {
-          "first_name": firstName,
-          "last_name": lastName,
-          "email": email,
-          "password": password,
-          "class_id": classId,
+      // signUp() logs in as the new user, so capture the teacher's session
+      // to restore it once the student account has been created.
+      final teacherSession = supabase.auth.currentSession;
+
+      final signUpRes = await supabase.auth.signUp(
+        email: email,
+        password: password,
+        data: {
+          'first_name': firstName,
+          'last_name': lastName,
+          'role': 'student',
+          'class_id': classId,
         },
       );
 
-      if (res.data == null) {
-        return "Unknown error (empty response)";
+      final newUser = signUpRes.user;
+      if (newUser == null) {
+        return "Failed to create student account.";
       }
 
-      final raw = res.data;
-      dynamic json;
+      await DatabaseHelper.instance.insertUser({
+        'id': newUser.id,
+        'email': email,
+        'first_name': firstName,
+        'last_name': lastName,
+        'role': 'student',
+        'locale': 'en-US',
+        'class_id': classId,
+      });
 
-      try {
-        json = raw is String ? jsonDecode(raw) : raw;
-      } catch (e) {
-        return "Invalid JSON returned from server";
-      }
-
-      if (json["error"] != null) {
-        return json["error"];
+      if (teacherSession != null) {
+        await supabase.auth.setSession(teacherSession.refreshToken!);
       }
 
       await loadDashboard();
@@ -378,39 +384,55 @@ class TeacherProvider extends ChangeNotifier {
 
     final classId = classRow['id'];
 
+    // signUp() logs in as each new user, so capture the teacher's session
+    // to restore it once all students have been created.
+    final teacherSession = supabase.auth.currentSession;
+
     final List<Map<String, String>> added = [];
     final List<Map<String, String>> failed = [];
 
     for (final row in rows) {
       try {
-        final res = await supabase.functions.invoke(
-          'create_student',
-          body: {
-            "first_name": row["first_name"],
-            "last_name": row["last_name"],
-            "email": row["email"],
-            "password": row["password"],
-            "class_id": classId,
+        final firstName = row["first_name"];
+        final lastName = row["last_name"];
+        final email = row["email"];
+        final password = row["password"];
+
+        final signUpRes = await supabase.auth.signUp(
+          email: email!,
+          password: password!,
+          data: {
+            'first_name': firstName,
+            'last_name': lastName,
+            'role': 'student',
+            'class_id': classId,
           },
         );
 
-        dynamic json;
-
-        try {
-          json = res.data is String ? jsonDecode(res.data) : res.data;
-        } catch (_) {
-          failed.add({"row": jsonEncode(row), "reason": "Invalid JSON from server"});
+        final newUser = signUpRes.user;
+        if (newUser == null) {
+          failed.add({"row": jsonEncode(row), "reason": "Failed to create student account."});
           continue;
         }
 
-        if (json is Map && json["error"] != null) {
-          failed.add({"row": jsonEncode(row), "reason": json["error"]});
-        } else {
-          added.add(row);
-        }
+        await DatabaseHelper.instance.insertUser({
+          'id': newUser.id,
+          'email': email,
+          'first_name': firstName,
+          'last_name': lastName,
+          'role': 'student',
+          'locale': 'en-US',
+          'class_id': classId,
+        });
+
+        added.add(row);
       } catch (e) {
         failed.add({"row": jsonEncode(row), "reason": e.toString()});
       }
+    }
+
+    if (teacherSession != null) {
+      await supabase.auth.setSession(teacherSession.refreshToken!);
     }
 
     await loadDashboard();
