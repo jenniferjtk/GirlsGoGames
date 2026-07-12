@@ -36,7 +36,7 @@ app.post("/generate-story", async (req, res) => {
     if (!prompt) {
       return res.status(400).json({ error: "prompt is required" });
     }
-
+    console.log("📖 Calling OpenAI...");
     const response = await client.responses.create({
       model,
       input: [
@@ -50,7 +50,6 @@ app.post("/generate-story", async (req, res) => {
           content: prompt
         }
       ],
-      temperature: 0.7,
       max_output_tokens: 250
     });
 

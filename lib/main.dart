@@ -26,6 +26,7 @@ import 'package:readright/screen/teacher/teacherWordLists.dart';
 import 'package:readright/screen/teacher/teacherStudents.dart';
 import 'package:readright/screen/teacher/teacherSettings.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:readright/screen/ai_story_builder.dart';
 
 
 Future<void> main() async {
@@ -159,6 +160,7 @@ class _MyAppState extends State<MyApp> {
         '/teacherWordLists': (context) => const TeacherWordListsPage(),
         '/teacherStudents': (context) => const TeacherStudentsPage(),
         '/teacherSettings': (context) => const TeacherSettingsPage(),
+        '/aiStoryBuilder': (context) => const AIStoryBuilderPage(),
       },
     );
   }
