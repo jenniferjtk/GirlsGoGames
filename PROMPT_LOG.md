@@ -173,3 +173,42 @@ Accepted. The page was added with only small changes to match the existing app.
 
 Testing / Verification:
 Opened the Story Builder page, submitted a Dolch word prompt, and confirmed the generated story was returned and displayed correctly.
+
+# Entry 9: Migrating Credentials to Environment Variables (tool: Claude, 6/24/26) [Jennifer]
+Context:
+The inherited codebase had the Supabase URL and anon key hardcoded in plaintext in config/config.dart. The goal was to move these credentials into a .env file loaded at runtime using flutter_dotenv so they would never be committed to the repository.
+
+Prompt Excerpt:
+Asked Claude to rewrite config.dart to read the Supabase URL, anon key, and Azure key from flutter_dotenv environment variables instead of hardcoded strings, and to update main.dart accordingly.
+
+AI Summary:
+Claude rewrote config.dart as a getter-based class reading from dotenv.env for all three credentials, updated main.dart to use final instead of const when assigning the Supabase values since getters cannot be used with const, and flagged that flutter_dotenv needed to be moved from dev_dependencies to dependencies in pubspec.yaml so it would be available in release builds.
+
+Human Evaluation:
+The credential migration was correct and the final vs const distinction was accurate. However, Claude's rewrite removed the color constants and appName that other files in the app depended on, causing red squiggle errors across multiple screens. These had to be added back manually by checking what AppConfig values were referenced elsewhere in the codebase.
+
+Final Decision:
+Accepted with modification. The getter-based credential loading was kept, and the missing constants (primaryColor, secondaryColor, appName) were restored using the original app colors found in pubspec.yaml's splash screen configuration.
+
+Testing and Verification:
+Ran flutter run -d chrome after the fix and confirmed the app connected to Supabase successfully. The signup screen no longer showed "Failed to fetch." Also ran flutter analyze and confirmed warnings dropped from 49 to 37 info-level only issues with no remaining warnings.
+
+# Entry 10: Fixing Teacher Add Student Feature (tool: Claude, 7/5/26) [Jennifer]
+
+Context:
+The teacher dashboard's "Add New Student" button was failing with the error "Failed to fetch, uri=https://fdqfxkddijsbbhwgmfeu.supabase.co/functions/v1/create_student." The original team had built this feature using a Supabase Edge Function that no longer existed in our migrated project. The goal was to fix the feature so teachers could add students without depending on the missing edge function.
+
+Prompt Excerpt:
+Asked Claude to find where the create_student edge function call was made in the codebase and replace it with a direct Supabase database insert that matched the pattern already used in signup.dart, without creating any new edge functions.
+
+AI Summary:
+Claude located the edge function call in the teacher dashboard files, identified that the bulk upload feature used the same broken call, and proposed replacing both with direct Supabase auth signup calls followed by a database insert into the users table. Claude flagged that using supabase.auth.signUp() client-side would automatically log the teacher out and replace their session with the new student's session, and recommended capturing and restoring the teacher's session afterward to prevent this.
+
+Human Evaluation:
+The diagnosis was accurate — both the single student add and bulk upload were broken for the same reason. The session replacement issue was a real problem that Claude correctly identified before making the fix, which was not something that would have been obvious without understanding how Supabase client-side auth works. The recommended fix of restoring the teacher session was the right approach.
+
+Final Decision:
+Accepted. Chose the session restore option so the teacher stays logged in after adding a student, and also chose to fix the bulk upload at the same time since it had the identical problem.
+
+Testing and Verification:
+Ran the app after the fix, logged in as a teacher, and used the Add New Student form to create a test student account. Confirmed the teacher remained on the dashboard after submission rather than being redirected to the student view. Then logged out and logged in with the new student credentials to confirm the account was created correctly in Supabase.
