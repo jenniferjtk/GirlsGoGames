@@ -212,3 +212,23 @@ Accepted. Chose the session restore option so the teacher stays logged in after 
 
 Testing and Verification:
 Ran the app after the fix, logged in as a teacher, and used the Add New Student form to create a test student account. Confirmed the teacher remained on the dashboard after submission rather than being redirected to the student view. Then logged out and logged in with the new student credentials to confirm the account was created correctly in Supabase.
+
+# Entry 11: Tradeoffs and Emulator Error fixes (tool: ChatGPT &Claude, 7/12/26) [Karina]
+
+Context:
+Flutter Project succesffully runs on chrome and across all member's local devices, but was not working on emulators. Constraints: (fill in here) Risks: (fill in here)
+
+Prompt Excerpt:
+Told AI what device, program, emulator information, and scope of the project. Asked AI where could the error be preventing android emulator from running the project.
+
+AI Summary:
+Claude located the problem as well of what code to fix.
+
+Human Evaluation:
+ChatGPT was unable to locate the exact issue. Switched to
+
+Final Decision:
+Went over code and redownloaded android simulator to create another device
+
+Testing and Verification:
+Ran the app after the fix, logged in as a student and tested features.

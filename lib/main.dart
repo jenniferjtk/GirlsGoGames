@@ -36,7 +36,7 @@ Future<void> main() async {
 final supabaseUrl = AppConfig.supabaseUrl;
 final supabaseAnonKey = AppConfig.supabaseAnonKey;
 
-  MediaKit.ensureInitialized();
+  //MediaKit.ensureInitialized();
 
   await Supabase.initialize(
     url: supabaseUrl,

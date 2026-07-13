@@ -1,8 +1,8 @@
-# ReadRight
+# GirlsGoGames
 
 ## Overview
 
-ReadRight allows students to record themselves reading target words, receive automated pronunciation feedback, and view their progress.  
+GirlsGoGames allows students to record themselves reading target words, receive automated pronunciation feedback, and view their progress.  
 Teachers can assign custom word lists, review results, and optionally access student recordings.
 
 ---
@@ -197,8 +197,7 @@ Other folders:
 ---
 
 ## Credits
-
-Developed by **Business Logic** (Max Koon, Ben Curry, Dawson Moon, Connor Cromer)
+Orginally Developed by **Business Logic** (Max Koon, Ben Curry, Dawson Moon, Connor Cromer)
 Clemson University — CPSC 4150 / 6150  
 Instructor: Professor Wooster  
 Semester: Fall 2025
