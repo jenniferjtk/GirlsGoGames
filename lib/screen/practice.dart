@@ -5,16 +5,14 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:readright/config/config.dart';
 import 'package:readright/widgets/student_base_scaffold.dart';
 import 'package:readright/models/word.dart';
-import 'package:http/http.dart' as http;
 import 'package:permission_handler/permission_handler.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:io';
-import 'dart:convert';
 import 'package:record/record.dart';
 import '../models/assessment_result.dart';
+import '../services/pronunciation_assessor.dart';
 import 'package:confetti/confetti.dart';
 import 'package:flutter_tts/flutter_tts.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class PracticePage extends StatefulWidget {
   final bool testMode;
@@ -29,6 +27,8 @@ class PracticePage extends StatefulWidget {
 class _PracticePageState extends State<PracticePage> {
   final record = AudioRecorder();
   final FlutterTts textspeech = FlutterTts();
+  final PronunciationAssessor _pronunciationAssessor =
+      AzurePronunciationAssessor();
   bool _isRecording = false;
   bool _micIsReady = false;
   bool _hasPermission = false;
@@ -515,106 +515,72 @@ class _PracticePageState extends State<PracticePage> {
   Future<void> _sendToAssessmentServer(File wavFile) async {
     if (_currentWord == null) return;
 
-    const int loop = 3;
-    int goThrough = 0;
-    bool continues = true;
+    final user = Supabase.instance.client.auth.currentUser;
+    if (user == null) return;
 
-    while (goThrough < loop && continues) {
-      goThrough++;
-
-      final key = dotenv.env['AZURE_KEY'] as String;
-
-      final configJson = {
-        "referenceText": _currentWord!.text,
-        "gradingSystem": "HundredMark",
-        "dimension": "Comprehensive",
-      };
-      final configBase64 =
-      base64.encode(utf8.encode(json.encode(configJson)));
-
-      //AZURE REQUESTS
-
-      final url = Uri.parse(
-        "https://eastus2.stt.speech.microsoft.com/speech/recognition/conversation/cognitiveservices/v1?language=en-US",
-      );
-
-      final audioBytes = await wavFile.readAsBytes();
-
-      final response = await http.post(
-        url,
-        headers: {
-          "Ocp-Apim-Subscription-Key": key,
-          "Content-Type": "audio/wav",
-          "Pronunciation-Assessment": configBase64,
+    AssessmentResult result;
+    try {
+      result = await _pronunciationAssessor.assess(
+        audioFile: wavFile,
+        referenceText: _currentWord!.text,
+        onRetry: (_) {
+          ScaffoldMessenger.of(context)
+              .showSnackBar(const SnackBar(content: Text("Retrying...")));
         },
-        body: audioBytes,
       );
+    } on PronunciationAssessmentException {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Network Error retries failed.")),
+      );
+      _assessmentResult = null;
+      setState(() {});
+      return;
+    }
 
-      final user = Supabase.instance.client.auth.currentUser;
-      if (user == null) return;
+    _assessmentResult = result;
 
-      if (response.statusCode != 200 && goThrough == 3) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Network Error retries failed.")),
-        );
-        _assessmentResult = null;
-        setState(() {});
-        return;
-      } else if (response.statusCode != 200) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(const SnackBar(content: Text("Retrying...")));
-      } else {
-        continues = false;
+    final wordId = _currentWord!.id;
+    final score = result.pronScore;
 
-        final decoded = jsonDecode(response.body);
-        _assessmentResult = AssessmentResult.fromJson(decoded);
+    final shouldSave = await _shouldSaveAudio(user.id);
+    String? url;
 
-        final wordId = _currentWord!.id;
-        final score = _assessmentResult?.pronScore ?? 0;
+    if (shouldSave) {
+      try {
+        final fileName =
+            'recordings/${user.id}/${DateTime.now().millisecondsSinceEpoch}.wav';
 
-        final shouldSave = await _shouldSaveAudio(user.id);
-        String? url;
+        await Supabase.instance.client.storage
+            .from('Uploads')
+            .upload(fileName, wavFile);
 
-        if (shouldSave) {
-          try {
-            final fileName =
-                'recordings/${user.id}/${DateTime.now().millisecondsSinceEpoch}.wav';
-
-            await Supabase.instance.client.storage
-                .from('Uploads')
-                .upload(fileName, wavFile);
-
-            url = Supabase.instance.client.storage
-                .from('Uploads')
-                .getPublicUrl(fileName);
-          } catch (_) {
-            url = null;
-          }
-        }
-
-        final row = {
-          'user_id': user.id,
-          'word_id': wordId,
-          'score': score,
-          'feedback': "Good job",
-          'timestamp': DateTime.now().toIso8601String(),
-        };
-
-        if (url != null) row['recording_url'] = url;
-
-        await Supabase.instance.client.from('attempts').insert(row);
-
-        if (score >= 90) {
-          final already =
-          await _isWordAlreadyMastered(user.id, wordId);
-          if (!already) {
-            await _storeMasteredWord(
-                userId: user.id, wordId: wordId);
-          }
-
-          _confettiController.play();
-        }
+        url = Supabase.instance.client.storage
+            .from('Uploads')
+            .getPublicUrl(fileName);
+      } catch (_) {
+        url = null;
       }
+    }
+
+    final row = {
+      'user_id': user.id,
+      'word_id': wordId,
+      'score': score,
+      'feedback': "Good job",
+      'timestamp': DateTime.now().toIso8601String(),
+    };
+
+    if (url != null) row['recording_url'] = url;
+
+    await Supabase.instance.client.from('attempts').insert(row);
+
+    if (score >= 90) {
+      final already = await _isWordAlreadyMastered(user.id, wordId);
+      if (!already) {
+        await _storeMasteredWord(userId: user.id, wordId: wordId);
+      }
+
+      _confettiController.play();
     }
 
     setState(() {});
