@@ -80,7 +80,7 @@ class _PracticePageState extends State<PracticePage> {
     if (_currentWord == null) return;
     await textspeech.setLanguage('en-US');
     await textspeech.setPitch(1.3);
-    await textspeech.setSpeechRate(.7);
+    await textspeech.setSpeechRate(.45);
     await textspeech.speak(_currentWord!.text);
   }
 
@@ -92,7 +92,7 @@ class _PracticePageState extends State<PracticePage> {
 
     await textspeech.setLanguage('en-US');
     await textspeech.setPitch(1.3);
-    await textspeech.setSpeechRate(.7);
+    await textspeech.setSpeechRate(.45);
     await textspeech.speak(_currentWord!.sentences[sentloop]);
     sentloop++;
   }
@@ -100,7 +100,7 @@ class _PracticePageState extends State<PracticePage> {
   Future<void> conSpeech() async {
     await textspeech.setLanguage('en-US');
     await textspeech.setPitch(1.3);
-    await textspeech.setSpeechRate(.7);
+    await textspeech.setSpeechRate(.45);
     await textspeech.speak(
       "Great Job! You said ${_currentWord!.text} perfectly.",
     );
@@ -112,7 +112,7 @@ class _PracticePageState extends State<PracticePage> {
   Future<void> decentSpeech() async {
     await textspeech.setLanguage('en-US');
     await textspeech.setPitch(1.3);
-    await textspeech.setSpeechRate(.7);
+    await textspeech.setSpeechRate(.45);
     await textspeech.speak(
       "Great work, you said ${_currentWord!.text} correctly.",
     );
@@ -124,7 +124,7 @@ class _PracticePageState extends State<PracticePage> {
   Future<void> badSpeech() async {
     await textspeech.setLanguage('en-US');
     await textspeech.setPitch(1.3);
-    await textspeech.setSpeechRate(.7);
+    await textspeech.setSpeechRate(.45);
     await textspeech.speak(
       "Nice try! You were close to saying ${_currentWord!.text} correctly. I believe you can do it!",
     );
