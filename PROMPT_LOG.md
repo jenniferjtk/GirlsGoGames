@@ -216,7 +216,7 @@ Ran the app after the fix, logged in as a teacher, and used the Add New Student 
 # Entry 11: Tradeoffs and Emulator Error fixes (tool: ChatGPT &Claude, 7/12/26) [Karina]
 
 Context:
-Flutter Project succesffully runs on chrome and across all member's local devices, but was not working on emulators. Constraints: (fill in here) Risks: (fill in here)
+Flutter Project succesffully runs on chrome and across all member's local devices, but was not working on emulators.
 
 Prompt Excerpt:
 Told AI what device, program, emulator information, and scope of the project. Asked AI where could the error be preventing android emulator from running the project.
@@ -332,3 +332,40 @@ Accepted.
 
 Testing and Verification:
 flutter analyze clean. Confirmed recording auto-stops at 3 seconds and the practice flow works identically through the new service on a real device.
+
+# Entry 17: Tap the Word Game — Feasibility Comparison and MVP (tool: Claude, 7/26/26) [Karina]
+
+Context:
+Comparing two candidate sight-word game concepts (Fill in the Blank vs. Tap the Word) for
+feasibility on top of the existing ReadRight codebase, then building a testable single-screen
+MVP of Tap the Word as a new addition to the app.
+
+Prompt Excerpt:
+Asked Claude which of two proposed game ideas (Fill in the Blank vs. Tap the Word) was easier
+to implement given the existing codebase. After Claude flagged Tap the Word as needing a new
+TTS/audio pipeline, reminded AI the app already has word-pronunciation software in practice.dart
+and asked to locate it. Then asked Claude to build a basic MVP — show a word, speak it aloud,
+show 3 answer buttons, let the student pick one, and end with feedback — following
+practice.dart's existing patterns.
+
+AI Summary:
+Claude initially assessed Fill in the Blank as easier since it reuses the existing sentences
+data, while flagging Tap the Word as needing a new TTS or audio-asset pipeline it assumed
+didn't exist yet. After being told practice.dart already speaks words aloud, Claude searched
+the repo and located the existing flutter_tts integration and wordSpeech() method, which
+reversed that assessment — Tap the Word turned out to be just as simple once the existing TTS
+call was reused instead of built from scratch. Claude then created
+lib/screen/tap_the_word.dart following practice.dart's FlutterTts/Supabase/StudentBaseScaffold
+patterns, wired a /tapTheWord route into main.dart, and added a dashboard button in
+studentDashboard.dart so the screen could be reached and tested.
+
+Human Evaluation:
+Game was accpectable as an MVP, but needed changes to actually form a a game round and make it engaging for a child.
+
+Final Decision:
+Accpected with changes needing to be done later on.
+
+Testing and Verification:
+ran flutter pub get / flutter run, opened the dashboard, tapped "Tap the Word
+(MVP)", confirmed the word is spoken, confirmed tapping the correct/incorrect button shows the
+right feedback screen

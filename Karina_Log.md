@@ -6,7 +6,7 @@ Tasks Completed/ Contributions Made:
 - Architecture Writeup
 - Get Emulator to work
 Challenhes Encountered:
-- conflicting code from forked team
+- conflicting code from forked team for emulator
 
 Something Learned:
 Writing a PRD requires foresight into future problems, for example, asking "how" and "why" about each pillar.
