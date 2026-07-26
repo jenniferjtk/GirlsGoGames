@@ -21,6 +21,7 @@ import 'package:readright/screen/progress.dart';
 import 'package:readright/screen/practice.dart';
 import 'package:readright/screen/wordList.dart';
 import 'package:readright/screen/feedback.dart';
+import 'package:readright/models/assessment_result.dart';
 import 'package:readright/screen/teacher/teacherDashboard.dart';
 import 'package:readright/screen/teacher/teacherWordLists.dart';
 import 'package:readright/screen/teacher/teacherStudents.dart';
@@ -155,7 +156,14 @@ class _MyAppState extends State<MyApp> {
         '/progress': (context) => const ProgressPage(),
         '/practice': (context) => const PracticePage(),
         '/wordlist': (context) => const WordListPage(),
-        '/feedback': (context) => const FeedbackPage(),
+        '/feedback': (context) {
+          final args = ModalRoute.of(context)!.settings.arguments
+              as Map<String, dynamic>;
+          return FeedbackPage(
+            word: args['word'] as String,
+            result: args['result'] as AssessmentResult,
+          );
+        },
         '/teacherDashboard': (context) => const TeacherDashboard(),
         '/teacherWordLists': (context) => const TeacherWordListsPage(),
         '/teacherStudents': (context) => const TeacherStudentsPage(),

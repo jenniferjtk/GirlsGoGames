@@ -1,9 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:readright/config/config.dart';
 import 'package:readright/widgets/student_base_scaffold.dart';
+import 'package:readright/models/assessment_result.dart';
 
 class FeedbackPage extends StatelessWidget {
-  const FeedbackPage({super.key});
+  final String word;
+  final AssessmentResult result;
+
+  const FeedbackPage({super.key, required this.word, required this.result});
+
+  String get _encouragement {
+    final score = result.pronScore;
+    if (score >= 90) return 'Excellent pronunciation!';
+    if (score >= 75) return 'Great work!';
+    if (score >= 50) return 'Keep practicing!';
+    return "You're doing great — try again!";
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -20,7 +32,7 @@ class FeedbackPage extends StatelessWidget {
               const SizedBox(height: 20),
               _buildScoreCard(),
               const SizedBox(height: 16),
-              _buildSoundAnalysisCard(),
+              _buildAccuracyBreakdownCard(),
               const SizedBox(height: 16),
               _buildTipsCard(),
               const SizedBox(height: 24),
@@ -64,12 +76,10 @@ class FeedbackPage extends StatelessWidget {
               color: Color(AppConfig.primaryColor),
             ),
           ),
-
-          //HARDOCDED TEXT
           const SizedBox(height: 16),
-          const Text(
-            'cat',
-            style: TextStyle(
+          Text(
+            word,
+            style: const TextStyle(
               fontSize: 42,
               fontWeight: FontWeight.bold,
               color: Color(0xFF2D3748),
@@ -78,7 +88,7 @@ class FeedbackPage extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            'Excellent pronunciation!',
+            _encouragement,
             style: TextStyle(
               fontSize: 18,
               color: Color(AppConfig.primaryColor),
@@ -92,6 +102,7 @@ class FeedbackPage extends StatelessWidget {
 
   // Pronunciation Score Card
   Widget _buildScoreCard() {
+    final score = result.pronScore;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
       child: Card(
@@ -130,7 +141,7 @@ class FeedbackPage extends StatelessWidget {
                         ClipRRect(
                           borderRadius: BorderRadius.circular(10),
                           child: LinearProgressIndicator(
-                            value: 0.88,
+                            value: (score / 100).clamp(0.0, 1.0),
                             minHeight: 14,
                             backgroundColor: const Color(0xFFE2E8F0),
                             valueColor: AlwaysStoppedAnimation<Color>(
@@ -140,7 +151,7 @@ class FeedbackPage extends StatelessWidget {
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          'Accuracy: 88%',
+                          'Accuracy: ${result.accuracy.toStringAsFixed(0)}%',
                           style: TextStyle(
                             fontSize: 14,
                             color: Colors.grey.shade600,
@@ -165,7 +176,7 @@ class FeedbackPage extends StatelessWidget {
                       ),
                     ),
                     child: Text(
-                      '88',
+                      score.toStringAsFixed(0),
                       style: TextStyle(
                         fontSize: 28,
                         fontWeight: FontWeight.bold,
@@ -182,8 +193,11 @@ class FeedbackPage extends StatelessWidget {
     );
   }
 
-  // Sound Analysis Card
-  Widget _buildSoundAnalysisCard() {
+  // Accuracy Breakdown Card
+  // AssessmentResult only carries word-level accuracy, not phoneme-level
+  // data, so this replaces the old phoneme chip section with the
+  // accuracy/fluency/completeness scores Azure returns.
+  Widget _buildAccuracyBreakdownCard() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
       child: Card(
@@ -203,7 +217,7 @@ class FeedbackPage extends StatelessWidget {
                   ),
                   const SizedBox(width: 8),
                   const Text(
-                    'Sound Analysis',
+                    'Accuracy Breakdown',
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w600,
@@ -213,11 +227,11 @@ class FeedbackPage extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 16),
-              _buildPhonemeChip('/k/', true),
+              _buildScoreRow('Accuracy', result.accuracy),
               const SizedBox(height: 10),
-              _buildPhonemeChip('/æ/', true),
+              _buildScoreRow('Fluency', result.fluency),
               const SizedBox(height: 10),
-              _buildPhonemeChip('/t/', true),
+              _buildScoreRow('Completeness', result.completeness),
             ],
           ),
         ),
@@ -344,47 +358,42 @@ class FeedbackPage extends StatelessWidget {
   }
 
   // Helper Widgets
-  Widget _buildPhonemeChip(String phoneme, bool isCorrect) {
+  Widget _buildScoreRow(String label, double value) {
+    final bool good = value >= 75;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       decoration: BoxDecoration(
-        color: isCorrect
+        color: good
             ? Color(AppConfig.primaryColor).withOpacity(0.1)
             : Colors.red.shade50,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: isCorrect
-              ? Color(AppConfig.primaryColor)
-              : Colors.red.shade300,
+          color: good ? Color(AppConfig.primaryColor) : Colors.red.shade300,
           width: 2,
         ),
       ),
       child: Row(
         children: [
           Icon(
-            isCorrect ? Icons.check_circle : Icons.cancel,
-            color: isCorrect
-                ? Color(AppConfig.primaryColor)
-                : Colors.red.shade600,
+            good ? Icons.check_circle : Icons.cancel,
+            color: good ? Color(AppConfig.primaryColor) : Colors.red.shade600,
             size: 24,
           ),
           const SizedBox(width: 12),
           Text(
-            phoneme,
+            label,
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
-              color: isCorrect ? const Color(0xFF2D3748) : Colors.red.shade900,
+              color: good ? const Color(0xFF2D3748) : Colors.red.shade900,
             ),
           ),
           const Spacer(),
           Text(
-            isCorrect ? 'Correct' : 'Try again',
+            '${value.toStringAsFixed(0)}%',
             style: TextStyle(
               fontSize: 14,
-              color: isCorrect
-                  ? Color(AppConfig.primaryColor)
-                  : Colors.red.shade700,
+              color: good ? Color(AppConfig.primaryColor) : Colors.red.shade700,
               fontWeight: FontWeight.w600,
             ),
           ),

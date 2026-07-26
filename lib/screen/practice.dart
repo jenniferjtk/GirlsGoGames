@@ -855,6 +855,32 @@ class _PracticePageState extends State<PracticePage> {
                 style: const TextStyle(fontSize: 22),
               ),
             ),
+
+            const SizedBox(height: 16),
+
+            OutlinedButton.icon(
+              onPressed: () => Navigator.pushNamed(
+                context,
+                '/feedback',
+                arguments: {
+                  'word': _currentWord?.text ?? '',
+                  'result': r,
+                },
+              ),
+              icon: const Icon(Icons.feedback_outlined),
+              label: const Text(
+                "View Feedback",
+                style: TextStyle(fontSize: 18),
+              ),
+              style: OutlinedButton.styleFrom(
+                minimumSize: const Size(230, 55),
+                foregroundColor: Color(AppConfig.primaryColor),
+                side: BorderSide(
+                  color: Color(AppConfig.primaryColor),
+                  width: 2,
+                ),
+              ),
+            ),
           ],
         ),
       ),
