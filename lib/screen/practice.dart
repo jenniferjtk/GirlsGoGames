@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:readright/config/config.dart';
@@ -142,12 +143,16 @@ class _PracticePageState extends State<PracticePage> {
   }
 
   Future<void> _initRecording() async {
-    final mic = await Permission.microphone.request();
-    if (!mic.isGranted) {
-      _hasPermission = false;
+    if (kIsWeb) {
+      _hasPermission = true;
+      if (mounted) setState(() {});
       return;
     }
-    _hasPermission = true;
+    final mic = await Permission.microphone.request();
+    if (!mounted) return;
+    setState(() {
+      _hasPermission = mic.isGranted;
+    });
   }
 
   Future<Map<String, dynamic>?> _fetchCurrentListRecord(String userId) async {
