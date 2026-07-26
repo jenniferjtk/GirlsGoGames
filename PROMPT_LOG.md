@@ -232,3 +232,103 @@ Went over code and redownloaded android simulator to create another device
 
 Testing and Verification:
 Ran the app after the fix, logged in as a student and tested features.
+
+# Entry 12: Wiring Real Data into the Feedback Screen (tool: Claude, 7/26/26) [Jennifer]
+
+Context:
+feedback.dart was a fully hardcoded placeholder screen, always showing the word "cat," a score of 88%, and fake phoneme chips regardless of what the student actually practiced. The goal was to make it show the real word and real AssessmentResult from the student's most recent attempt.
+
+Prompt Excerpt:
+Asked Claude to look at the AssessmentResult model and how practice.dart already displays assessment results, then rebuild feedback.dart to accept the practiced word and AssessmentResult and replace every hardcoded value with real data, and to confirm whether real phoneme-level data was available.
+
+AI Summary:
+Claude found that AssessmentResult only contains word-level accuracy, not phoneme-level data, so it removed the fake phoneme chip section entirely and replaced it with an accuracy/fluency/completeness breakdown using the real Azure scores. It also added a "View Feedback" button to practice.dart alongside the existing Next Word/Try Again buttons, and updated the /feedback route in main.dart to pass the word and result as arguments.
+
+Human Evaluation:
+Confirmed directly in assessment_result.dart that phoneme-level data genuinely does not exist, so removing that section instead of faking it was the right call. The new accuracy breakdown card reuses the same visual style as the old phoneme chips, so the screen didn't lose its look.
+
+Final Decision:
+Accepted.
+
+Testing and Verification:
+Ran flutter analyze with no new warnings. Full end-to-end verification (recording a real attempt and viewing the resulting feedback screen) was deferred until the microphone permission bug below was fixed, since practice couldn't produce a real attempt until then.
+
+# Entry 13: iOS Microphone Permission Root-Cause Investigation (tool: Claude, 7/26/26) [Jennifer]
+
+Context:
+The Practice screen showed "You need to enable permissions in the app settings" on both iOS Simulator and a real iPhone, even after granting microphone access. This blocked all real testing of the pronunciation pillar.
+
+Prompt Excerpt:
+Asked Claude to figure out why iOS never even showed a permission dialog, despite the Info.plist usage description being present and the app running fine on web after a simple kIsWeb bypass.
+
+AI Summary:
+Claude ruled out several causes with direct evidence before finding the real one: confirmed the simulator's TCC database had no cached denial, confirmed no MDM/Screen Time restrictions were blocking it, confirmed the audio input device was correctly configured, and confirmed a misconfigured xcode-select path wasn't the cause. Added temporary debug logging that showed Permission.microphone.request() was returning "denied" immediately, before any dialog could appear, even on a freshly erased simulator. That led to finding that the permission_handler iOS plugin silently hardcodes every permission check to "denied" unless a PERMISSION_MICROPHONE=1 preprocessor macro is added to the Podfile, which was missing. Separately found that _initRecording() never called setState() after the async permission result came back, so the UI wouldn't refresh even once permission was actually granted.
+
+Human Evaluation:
+This took many iterations because several plausible causes had to be eliminated with real evidence (TCC database queries, system logs, temporary debug prints) rather than guessed at. The methodical process of ruling things out was slow but avoided chasing the wrong fix, and the Podfile macro issue would have been very hard to find without that process.
+
+Final Decision:
+Accepted all four fixes together: the Info.plist usage description, the Podfile macro, the missing setState(), and the earlier kIsWeb bypass (kept as a legitimate separate fix for web, not a workaround for the same bug).
+
+Testing and Verification:
+Verified with temporary debug logging showing the exact permission status at each stage, then confirmed the real iOS system permission dialog appeared and microphone access worked, tested on both iOS Simulator and a real physical iPhone.
+
+# Entry 14: Removing media_kit After an iOS Crash (tool: Claude, 7/26/26) [Jennifer]
+
+Context:
+media_kit and its native backend packages were crashing the app on iOS with "Cannot find Mpv.framework." The assumption going in was that media_kit was unused dead weight.
+
+Prompt Excerpt:
+Asked Claude to remove media_kit from main.dart and pubspec.yaml, since audio recording and TTS use separate packages (record and flutter_tts).
+
+AI Summary:
+Claude found that media_kit was not unused — the teacher's student-attempts screen used it to let a teacher play back a student's recorded audio, a real working feature. Instead of just deleting it and breaking that feature, Claude proposed and implemented a replacement using just_audio, which doesn't depend on the crashing native framework.
+
+Human Evaluation:
+Catching that the feature was actually in use before removing the dependency was important; deleting it outright would have silently broken audio playback for teachers.
+
+Final Decision:
+Accepted the just_audio replacement over the two other options considered (leaving media_kit installed just for that one screen, or removing the feature entirely).
+
+Testing and Verification:
+flutter analyze clean, no media_kit references remaining anywhere in the codebase. A teammate had independently patched the same crash with a partial fix (commenting out the initialization call) in a separate commit; this was reconciled during a git rebase, keeping the full removal.
+
+# Entry 15: Azure Key Diagnosis and Backend Proxy (tool: Claude, 7/26/26) [Jennifer]
+
+Context:
+The pronunciation feature failed with "Network Error retries failed" after every attempt. Separately, the course rubric requires every API call to route through a backend proxy with no key embedded in the Flutter app, but the Azure Speech key was being called directly from the app via a bundled .env file.
+
+Prompt Excerpt:
+First asked Claude to diagnose the network error. After confirming it was a real backend, asked Claude to move the Azure call behind our existing Node backend so the key is never shipped inside the app.
+
+AI Summary:
+Claude tested the Azure endpoint directly with curl using the existing key and got a 401 Unauthorized, proving it was an invalid/stale key rather than a network problem. After the key was replaced with a valid one from the Azure Portal, Claude added a /assess-pronunciation route to the existing backend/server.js that mirrors the exact same Azure request shape, moved the key into backend/.env, and removed it from the app's .env entirely, since .env is bundled as an asset into the compiled app regardless of whether the Dart code still reads it.
+
+Human Evaluation:
+Testing the key directly with curl instead of guessing saved a lot of time. Catching that the key was still physically bundled into the app via the .env asset, even after the Dart code stopped reading it, was a detail that would have been easy to miss.
+
+Final Decision:
+Accepted. Also added a configurable BACKEND_BASE_URL override in .env so a real device (which can't reach "localhost") can be pointed at the Mac's LAN IP during testing.
+
+Testing and Verification:
+Verified the backend route directly with curl (health check, missing-parameter validation, and a real call that returned a genuine Azure response), then verified the full app flow on both iOS Simulator and a real iPhone.
+
+# Entry 16: Pronunciation Service Extraction and Recording Cap (tool: Claude, 7/26/26) [Jennifer]
+
+Context:
+The PRD commits to two things for Pillar 1 that weren't implemented: capping recordings at 3 seconds, and extracting audio capture/assessment logic out of the practice screen into a dedicated, swappable PronunciationAssessor interface.
+
+Prompt Excerpt:
+Asked Claude to check the PRD against the current implementation, identify what was still outstanding for Pillar 1, and implement it.
+
+AI Summary:
+Claude found the 3-second cap was never implemented (a countdown existed in the code but was commented out and never wired to anything), and that all Azure networking, retry, and parsing logic lived inline inside the 800+ line practice screen instead of behind an interface. Claude added a Timer-based auto-stop matching the manual Stop button's behavior, and extracted the Azure logic into services/pronunciation_assessor.dart behind a PronunciationAssessor interface with AzurePronunciationAssessor as the implementation, so a different provider could be swapped in later without touching the practice screen.
+
+Human Evaluation:
+The extraction preserved the exact same retry count and error messages, so no user-facing behavior changed, only where the code lives. This directly matches what the PRD committed to for this pillar's architecture.
+
+Final Decision:
+Accepted.
+
+Testing and Verification:
+flutter analyze clean. Confirmed recording auto-stops at 3 seconds and the practice flow works identically through the new service on a real device.
