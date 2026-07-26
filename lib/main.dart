@@ -28,6 +28,7 @@ import 'package:readright/screen/teacher/teacherSettings.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:readright/screen/ai_story_builder.dart';
 import 'package:readright/screen/tap_the_word.dart';
+import 'package:readright/screen/games.dart';
 
 
 Future<void> main() async {
@@ -168,6 +169,7 @@ class _MyAppState extends State<MyApp> {
         '/teacherSettings': (context) => const TeacherSettingsPage(),
         '/aiStoryBuilder': (context) => const AIStoryBuilderPage(),
         '/tapTheWord': (context) => const TapTheWordPage(),
+        '/games': (context) => const GamesHubPage(),
       },
     );
   }

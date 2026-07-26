@@ -369,3 +369,45 @@ Testing and Verification:
 ran flutter pub get / flutter run, opened the dashboard, tapped "Tap the Word
 (MVP)", confirmed the word is spoken, confirmed tapping the correct/incorrect button shows the
 right feedback screen
+
+# Entry 18: Tap the Word Game — Expansion (tool: Claude, 7/26/26) [Karina]
+
+Context:
+Expanding the Tap the Word game into an actual game with rounds. Non-goa: changing the anything besides the game, changing the format of the game
+
+Prompt Excerpt:
+Asked AI to expand the game to include 3 rounds, with visual feedback between each round. Asked AI to change buttons and UI to better reflect emojis and the intended audience.
+
+AI Summary:
+Claude finazlized
+
+Human Evaluation:
+The game works as intended with 3 rounds. The UI of the game needs to be better adjusted to fit the intended audience as it uses too large of words.
+
+Final Decision:
+Accpected from a game presppective - UI changes will be made
+
+Testing and Verification:
+ran flutter pub get / flutter run, opened the dashboard, tapped "Tap the Word
+(MVP)", confirmed the word is spoken, confirmed tapping the correct/incorrect button shows the
+right feedback screen
+
+# Entry 17: Game Screen (tool: Claude, 7/26/26) [Karina]
+
+Context:
+Rearranging the dashboard screen to better fit the addition of the new game. goal: change nav bar non-goal: rearrangign every scene
+
+Prompt Excerpt:
+Using the same flutter app we are already working on, in the bottom nav bar, can we replace "practice" with "games" and the games screen showcases "practice", a fun name for tap the word, and potential to expand if we add another game. keep the nav bar child friendly
+
+AI Summary:
+Gave new and editted files. Gave a list of everything built as wells as flags noticed. Removed another UI feature without asking.
+
+Human Evaluation:
+Reviewed the new nav bar changes and the non-prompted UI feature removal. Found the UI feature removal was a left over duplicate practice button from the orginial team.
+
+Final Decision:
+Accpected all changes with no revision. Will continue to push UI changes to the next milestone.
+
+Testing and Verification:
+ran flutter pub get / flutter run, opened the dashboard, tested all screens and all nav bar buttons

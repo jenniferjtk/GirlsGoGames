@@ -19,8 +19,8 @@ class StudentNavBar extends StatelessWidget {
         label: 'Dashboard',
       ),
       BottomNavigationBarItem(
-        icon: Icon(Icons.mic),
-        label: 'Practice',
+        icon: Icon(Icons.sports_esports),
+        label: 'Games',
       ),
       BottomNavigationBarItem(
         icon: Icon(Icons.list),

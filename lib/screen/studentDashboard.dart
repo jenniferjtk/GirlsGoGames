@@ -159,7 +159,7 @@ class _StudentDashboardState extends State<StudentDashboard> {
             height: 55,
             child: ElevatedButton.icon(
               onPressed: () {
-                Navigator.pushReplacementNamed(context, '/practice');
+                Navigator.pushReplacementNamed(context, '/games');
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Color(AppConfig.primaryColor),
@@ -168,62 +168,9 @@ class _StudentDashboardState extends State<StudentDashboard> {
                   borderRadius: BorderRadius.circular(10),
                 ),
               ),
-              icon: const Icon(Icons.play_arrow, size: 28),
+              icon: const Icon(Icons.sports_esports, size: 28),
               label: const Text(
-                'Start Practice',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(height: 14),
-          SizedBox(
-            width: double.infinity,
-            height: 55,
-            child: ElevatedButton.icon(
-              onPressed: () {
-                Navigator.pushNamed(context, '/tapTheWord');
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.deepPurple,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-              ),
-              icon: const Icon(Icons.hearing, size: 28),
-              label: const Text(
-                'Tap the Word (MVP)',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(height: 20),
-
-          const Spacer(),
-
-          SizedBox(
-            width: double.infinity,
-            height: 55,
-            child: ElevatedButton.icon(
-              onPressed: () {
-                Navigator.pushReplacementNamed(context, '/practice');
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Color(AppConfig.primaryColor),
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-              ),
-              icon: const Icon(Icons.play_arrow, size: 28),
-              label: const Text(
-                'Start Practice',
+                'Play Games',
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,

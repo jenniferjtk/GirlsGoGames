@@ -82,7 +82,7 @@ class StudentBaseScaffold extends StatelessWidget {
               Navigator.pushReplacementNamed(context, '/studentDashboard');
               break;
             case 1:
-              Navigator.pushReplacementNamed(context, '/practice');
+              Navigator.pushReplacementNamed(context, '/games');
               break;
             case 2:
               Navigator.pushReplacementNamed(context, '/wordlist');
