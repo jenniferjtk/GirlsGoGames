@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:media_kit/media_kit.dart';
+import 'package:just_audio/just_audio.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 class StudentAttemptsScreen extends StatefulWidget {
@@ -24,7 +24,7 @@ class _StudentAttemptsScreenState extends State<StudentAttemptsScreen> {
   String? errorMessage;
   List<dynamic> attempts = [];
 
-  Player? player;
+  AudioPlayer? player;
   bool isPlaying = false;
   String? currentUrl;
 
@@ -36,10 +36,12 @@ class _StudentAttemptsScreenState extends State<StudentAttemptsScreen> {
   }
 
   Future<void> initPlayer() async {
-    player = Player();
+    player = AudioPlayer();
 
-    player!.stream.completed.listen((_) {
-      if (mounted) setState(() => isPlaying = false);
+    player!.playerStateStream.listen((state) {
+      if (state.processingState == ProcessingState.completed && mounted) {
+        setState(() => isPlaying = false);
+      }
     });
 
     await Permission.microphone.request();
@@ -87,7 +89,7 @@ class _StudentAttemptsScreenState extends State<StudentAttemptsScreen> {
         isPlaying = true;
       });
 
-      await player!.open(Media(url));
+      await player!.setUrl(url);
       await player!.play();
     } catch (e) {
       debugPrint("Playback error: $e");

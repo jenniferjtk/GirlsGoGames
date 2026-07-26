@@ -10,7 +10,6 @@ list(APPEND FLUTTER_PLUGIN_LIST
   firebase_core
   firebase_storage
   flutter_tts
-  media_kit_libs_windows_audio
   permission_handler_windows
   record_windows
   share_plus

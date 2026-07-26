@@ -1,6 +1,5 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:media_kit/media_kit.dart';
 import 'package:provider/provider.dart';
 import 'package:readright/providers/theme_provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -36,8 +35,6 @@ Future<void> main() async {
 
 final supabaseUrl = AppConfig.supabaseUrl;
 final supabaseAnonKey = AppConfig.supabaseAnonKey;
-
-  //MediaKit.ensureInitialized();
 
   await Supabase.initialize(
     url: supabaseUrl,
