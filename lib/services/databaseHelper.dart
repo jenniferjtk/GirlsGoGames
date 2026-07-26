@@ -461,8 +461,9 @@ class DatabaseHelper {
       if (listName == null ||
           wordText == null ||
           listName.isEmpty ||
-          wordText.isEmpty)
+          wordText.isEmpty) {
         continue;
+      }
 
       final listId = listNameToId[listName];
       if (listId == null) continue;
@@ -532,8 +533,9 @@ class DatabaseHelper {
       if (listName == null ||
           wordText == null ||
           listName.isEmpty ||
-          wordText.isEmpty)
+          wordText.isEmpty) {
         continue;
+      }
 
       final listId = listNameToId[listName];
       if (listId == null) continue;

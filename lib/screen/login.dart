@@ -161,7 +161,7 @@ class _LoginPageState extends State<LoginPage> {
                   "Don't have an account? Sign up",
                   style: TextStyle(
                     fontSize: 18,
-                    color: const Color(0xFF2E7D32),
+                    color: Color(0xFF2E7D32),
                   ),
                 ),
               ),
@@ -173,7 +173,7 @@ class _LoginPageState extends State<LoginPage> {
                   'Forgot your password? Reset here',
                   style: TextStyle(
                     fontSize: 18,
-                    color: const Color(0xFF2E7D32),
+                    color: Color(0xFF2E7D32),
                   ),
                 ),
               ),

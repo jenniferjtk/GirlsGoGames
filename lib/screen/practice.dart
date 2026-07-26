@@ -33,7 +33,7 @@ class _PracticePageState extends State<PracticePage> {
   bool _micIsReady = false;
   bool _hasPermission = false;
 
-  int _countdown = 0;
+  final int _countdown = 0;
   int sentloop = 0;
   bool _showCountdown = false;
 

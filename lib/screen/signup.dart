@@ -183,7 +183,7 @@ class _SignUpPageState extends State<SignUpPage> {
 
                 // Role dropdown
                 DropdownButtonFormField<String>(
-                  value: _selectedRole,
+                  initialValue: _selectedRole,
                   items: const [
                     DropdownMenuItem(value: 'student', child: Text('Student')),
                     DropdownMenuItem(value: 'teacher', child: Text('Teacher')),
@@ -204,7 +204,7 @@ class _SignUpPageState extends State<SignUpPage> {
                   _loadingClasses
                       ? const CircularProgressIndicator()
                       : DropdownButtonFormField<String>(
-                    value: _selectedClassId,
+                    initialValue: _selectedClassId,
                     items: _classes
                         .map<DropdownMenuItem<String>>(
                           (c) => DropdownMenuItem<String>(
