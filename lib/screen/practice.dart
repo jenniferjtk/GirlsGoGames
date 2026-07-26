@@ -36,6 +36,9 @@ class _PracticePageState extends State<PracticePage> {
   final int _countdown = 0;
   int sentloop = 0;
   bool _showCountdown = false;
+  Timer? _recordingCapTimer;
+
+  static const _maxRecordingDuration = Duration(seconds: 3);
 
   Word? _currentWord;
   Word? _previousWord;
@@ -471,6 +474,11 @@ class _PracticePageState extends State<PracticePage> {
     _isRecording = true;
     setState(() {});
 
+    _recordingCapTimer?.cancel();
+    _recordingCapTimer = Timer(_maxRecordingDuration, () {
+      if (_isRecording) _stopRecordingAndSend();
+    });
+
     record.onAmplitudeChanged(const Duration(milliseconds: 100)).listen(
           (amp) async {
         if (!_micIsReady) {
@@ -495,6 +503,7 @@ class _PracticePageState extends State<PracticePage> {
   }
 
   Future<void> _stopRecordingAndSend() async {
+    _recordingCapTimer?.cancel();
     final path = await record.stop();
     _isRecording = false;
     setState(() {});
@@ -636,6 +645,7 @@ class _PracticePageState extends State<PracticePage> {
 
   @override
   void dispose() {
+    _recordingCapTimer?.cancel();
     _confettiController.dispose();
     record.dispose();
     super.dispose();
