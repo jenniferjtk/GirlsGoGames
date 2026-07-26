@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:readright/providers/studentDashboardProvider.dart';
+import 'package:readright/providers/theme_provider.dart';
 import 'package:readright/screen/studentDashboard.dart';
 
 void main() {
@@ -9,6 +11,7 @@ void main() {
     late StudentDashboardProvider provider;
 
     setUp(() {
+      SharedPreferences.setMockInitialValues({});
       provider = StudentDashboardProvider(testMode: true);
 
       // Fake loaded state so UI renders immediately for tests
@@ -23,8 +26,15 @@ void main() {
     });
 
     Widget buildTestWidget() {
-      return ChangeNotifierProvider<StudentDashboardProvider>.value(
-        value: provider,
+      return MultiProvider(
+        providers: [
+          ChangeNotifierProvider<StudentDashboardProvider>.value(
+            value: provider,
+          ),
+          ChangeNotifierProvider<ThemeProvider>(
+            create: (_) => ThemeProvider(),
+          ),
+        ],
         child: MaterialApp(
           routes: {
             '/practice': (context) => const Placeholder(),

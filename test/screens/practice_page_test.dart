@@ -3,15 +3,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:readright/screen/practice.dart';
 
+import '../helpers/pump_app.dart';
 
 void main() {
   testWidgets('PracticePage should display microphone icon', (
       WidgetTester tester,
       ) async {
-    await tester.pumpWidget(
-      const MaterialApp(
-        home: PracticePage(testMode: true, skipLoad: true),
-      ),
+    await pumpWithProviders(
+      tester,
+      const PracticePage(testMode: true, skipLoad: true),
     );
 
     await tester.pumpAndSettle();
@@ -22,10 +22,9 @@ void main() {
   testWidgets('PracticePage should display Start Recording button', (
       WidgetTester tester,
       ) async {
-    await tester.pumpWidget(
-      const MaterialApp(
-        home: PracticePage(testMode: true, skipLoad: true),
-      ),
+    await pumpWithProviders(
+      tester,
+      const PracticePage(testMode: true, skipLoad: true),
     );
 
     await tester.pumpAndSettle();
@@ -36,10 +35,9 @@ void main() {
   testWidgets('PracticePage should show countdown when recording starts', (
       WidgetTester tester,
       ) async {
-    await tester.pumpWidget(
-      const MaterialApp(
-        home: PracticePage(testMode: true, skipLoad: true),
-      ),
+    await pumpWithProviders(
+      tester,
+      const PracticePage(testMode: true, skipLoad: true),
     );
 
     await tester.pumpAndSettle();
@@ -52,10 +50,9 @@ void main() {
   testWidgets('PracticePage should display current word text', (
       WidgetTester tester,
       ) async {
-    await tester.pumpWidget(
-      const MaterialApp(
-        home: PracticePage(testMode: true, skipLoad: true),
-      ),
+    await pumpWithProviders(
+      tester,
+      const PracticePage(testMode: true, skipLoad: true),
     );
 
     await tester.pumpAndSettle();
@@ -70,10 +67,9 @@ void main() {
   testWidgets('Recording button should toggle between Start and Stop', (
       WidgetTester tester,
       ) async {
-    await tester.pumpWidget(
-      const MaterialApp(
-        home: PracticePage(testMode: true, skipLoad: true),
-      ),
+    await pumpWithProviders(
+      tester,
+      const PracticePage(testMode: true, skipLoad: true),
     );
 
     await tester.pumpAndSettle();

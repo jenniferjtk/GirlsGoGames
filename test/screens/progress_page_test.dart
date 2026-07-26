@@ -2,24 +2,28 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:readright/screen/progress.dart';
 
+import '../helpers/pump_app.dart';
+
 void main() {
   testWidgets('ProgressPage should display loading indicator initially',
           (WidgetTester tester) async {
-        await tester.pumpWidget(const MaterialApp(
-          home: ProgressPage(skipLoad: true),
-        ));
+        await pumpWithProviders(
+          tester,
+          const ProgressPage(skipLoad: true),
+        );
 
         expect(find.byType(CircularProgressIndicator), findsOneWidget);
       });
 
   testWidgets('ProgressPage should have Overall Performance header',
           (WidgetTester tester) async {
-        await tester.pumpWidget(const MaterialApp(
-          home: ProgressPage(
+        await pumpWithProviders(
+          tester,
+          const ProgressPage(
             skipLoad: true,
             testStartLoaded: true,
           ),
-        ));
+        );
 
         await tester.pump();
 
@@ -28,12 +32,13 @@ void main() {
 
   testWidgets('ProgressPage should display stats card',
           (WidgetTester tester) async {
-        await tester.pumpWidget(const MaterialApp(
-          home: ProgressPage(
+        await pumpWithProviders(
+          tester,
+          const ProgressPage(
             skipLoad: true,
             testStartLoaded: true,
           ),
-        ));
+        );
 
         await tester.pump();
 
@@ -42,12 +47,13 @@ void main() {
 
   testWidgets('ProgressPage should display Recent Practice Sessions card',
           (WidgetTester tester) async {
-        await tester.pumpWidget(const MaterialApp(
-          home: ProgressPage(
+        await pumpWithProviders(
+          tester,
+          const ProgressPage(
             skipLoad: true,
             testStartLoaded: true,
           ),
-        ));
+        );
 
         await tester.pump();
 
@@ -56,12 +62,13 @@ void main() {
 
   testWidgets('ProgressPage should be scrollable',
           (WidgetTester tester) async {
-        await tester.pumpWidget(const MaterialApp(
-          home: ProgressPage(
+        await pumpWithProviders(
+          tester,
+          const ProgressPage(
             skipLoad: true,
             testStartLoaded: true,
           ),
-        ));
+        );
 
         await tester.pump();
 
@@ -71,12 +78,13 @@ void main() {
   testWidgets(
       'ProgressPage should display average score circle when data loads',
           (WidgetTester tester) async {
-        await tester.pumpWidget(const MaterialApp(
-          home: ProgressPage(
+        await pumpWithProviders(
+          tester,
+          const ProgressPage(
             skipLoad: true,
             testStartLoaded: true,
           ),
-        ));
+        );
 
         await tester.pump();
 
