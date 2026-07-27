@@ -60,7 +60,7 @@ class _LoginPageState extends State<LoginPage> {
         if (role == 'teacher') {
           Navigator.pushReplacementNamed(context, '/teacherDashboard');
         } else {
-          Navigator.pushReplacementNamed(context, '/progress');
+          Navigator.pushReplacementNamed(context, '/studentDashboard');
         }
       }
     } catch (e) {
