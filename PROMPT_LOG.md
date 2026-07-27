@@ -432,3 +432,43 @@ Final Verdict: Accpected and Caught a bug.
 
 Testing and Verification: ran 'flutter test' to confirm all 11 new tests pass, checked whether the
 three pre-existing tests pass or fail as suspected
+
+# Entry 19: Teacher Story Builder (tool: ChatGPT, 7/26/26) [Kathleen]
+
+Context:
+Moving the AI Story Builder from the student dashboard to the teacher dashboard
+
+Prompt Excerpt:
+Help me move the AI Story Builder from the student dashboard to the teacher dashboard and keep the rest of the app the same
+
+AI Summary:
+Suggested moving the button and making the teacher the only one who can generate stories
+
+Human Evaluation:
+The changes matched the assignment and were easy to add
+
+Final Decision:
+Accepted with no major changes
+
+Testing and Verification:
+Ran flutter run, logged in as both teacher and student, confirmed only the teacher could access the Story Builder.
+
+# Entry 20: AI Story Builder Backend (tool: ChatGPT, 7/26/26) [Kathleen]
+
+Context:
+Getting the AI Story Builder working with the backend
+
+Prompt Excerpt:
+Help me fix the backend so the Story Builder sends the correct information and returns a story
+
+AI Summary:
+Updated the backend request and fixed the story generation errors
+
+Human Evaluation:
+The backend worked after a few changes and generated stories correctly
+
+Final Decision:
+Accepted after fixing backend errors
+
+Testing and Verification:
+Ran node server.js and flutter run, generated multiple stories, and confirmed they displayed correctly

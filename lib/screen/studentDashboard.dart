@@ -128,31 +128,6 @@ class _StudentDashboardState extends State<StudentDashboard> {
           ),
 
           const Spacer(),
-
-          SizedBox(
-            width: double.infinity,
-            height: 55,
-            child: ElevatedButton.icon(
-              onPressed: () {
-                Navigator.pushNamed(context, '/aiStoryBuilder');
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.orange,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-              ),
-              icon: const Icon(Icons.auto_stories, size: 28),
-              label: const Text(
-                'AI Story Builder',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ),
           const SizedBox(height: 14),
           SizedBox(
             width: double.infinity,

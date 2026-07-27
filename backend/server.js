@@ -39,35 +39,87 @@ app.get("/health", (req, res) => {
 
 app.post("/generate-story", async (req, res) => {
   try {
-    const prompt = String(req.body?.prompt || "").trim();
+    const studentId = String(req.body?.studentId || "").trim();
+    const studentName = String(req.body?.studentName || "").trim();
+    const readingLevel = String(req.body?.readingLevel || "").trim();
+    const interest = String(req.body?.interest || "").trim();
+    const dolchWords = Array.isArray(req.body?.dolchWords)
+      ? req.body.dolchWords.map((word) => String(word).trim()).filter(Boolean)
+      : [];
 
-    if (!prompt) {
-      return res.status(400).json({ error: "prompt is required" });
+    if (!studentId || !studentName || !readingLevel || !interest) {
+      return res.status(400).json({
+        error: "studentId, studentName, readingLevel, and interest are required",
+      });
     }
-    console.log("📖 Calling OpenAI...");
+
+    if (dolchWords.length === 0) {
+      return res.status(400).json({ error: "dolchWords are required" });
+    }
+
+    const prompt = `
+You are writing for an early reader.
+
+Teacher request:
+- Student: ${studentName}
+- Reading level: ${readingLevel}
+- Interest: ${interest}
+
+Rules:
+- Write a short, age-appropriate story.
+- Use simple sentences.
+- Keep it warm, positive, and easy to read.
+- Naturally include several words from this Dolch list:
+${dolchWords.slice(0, 20).join(", ")}
+- About 90 to 120 words total.
+- Do not include scary, violent, romantic, or inappropriate content.
+- Return only the story text.
+`.trim();
+
+    console.log("📖 Generating story for:", {
+      studentId,
+      studentName,
+      readingLevel,
+      interest,
+    });
+
     const response = await client.responses.create({
       model,
       input: [
         {
           role: "developer",
           content:
-            "Write a short, kid-friendly story for a reading app. Use the requested Dolch words naturally. Keep it simple, warm, and appropriate for children. Return only the story text."
+            "Write only the story text. Keep it for young readers. Do not add markdown, labels, or extra commentary.",
         },
         {
           role: "user",
-          content: prompt
-        }
+          content: prompt,
+        },
       ],
-      max_output_tokens: 250
+      max_output_tokens: 300,
     });
 
+    const story = (response.output_text || "").trim();
+
+    if (!story) {
+      return res.status(502).json({ error: "No story text was returned" });
+    }
+
+    const title = `${studentName} and the ${interest}`;
+
     res.json({
-      story: (response.output_text || "").trim()
+      studentId,
+      studentName,
+      readingLevel,
+      interest,
+      title,
+      story,
+      dolchWordsUsed: dolchWords.slice(0, 12),
     });
   } catch (error) {
     console.error("Story generation failed:", error);
     res.status(500).json({
-      error: "Failed to generate story"
+      error: "Failed to generate story",
     });
   }
 });

@@ -413,6 +413,30 @@ class _TeacherDashboardView extends StatelessWidget {
                           ),
                         ),
 
+                          const SizedBox(height: 12),
+
+                          SizedBox(
+                            width: double.infinity,
+                            height: 54,
+                            child: ElevatedButton.icon(
+                              onPressed: () {
+                                Navigator.pushNamed(context, '/aiStoryBuilder');
+                              },
+                              icon: const Icon(Icons.auto_stories),
+                              label: const Text(
+                                'Teacher Story Builder',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Color(AppConfig.primaryColor),
+                                foregroundColor: Colors.white,
+                              ),
+                            ),
+                          ),
+
                         const SizedBox(height: 32),
                       ],
                     ],
