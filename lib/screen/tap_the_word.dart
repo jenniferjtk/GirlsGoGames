@@ -12,6 +12,43 @@ import 'package:readright/widgets/student_base_scaffold.dart';
 /// Number of words in a single "Tap the Word" round.
 const int kWordsPerRound = 3;
 
+/// Removes case-insensitive duplicate words by text, keeping the first
+/// occurrence of each. Pure logic, pulled out of the round-building code
+/// so it can be unit tested without spinning up the widget.
+List<Word> dedupeWordsByText(List<Word> words) {
+  final result = <Word>[];
+  for (final w in words) {
+    final alreadySeen =
+        result.any((d) => d.text.toLowerCase() == w.text.toLowerCase());
+    if (!alreadySeen) {
+      result.add(w);
+    }
+  }
+  return result;
+}
+
+/// Picks the round-summary title and emoji for a given [score] out of
+/// [total] words. Pure logic, pulled out of _buildRoundSummary so it can
+/// be unit tested without spinning up the widget.
+({String title, String emoji}) roundSummaryFor({
+  required int score,
+  required int total,
+}) {
+  if (total <= 0) {
+    return (title: 'Keep Practicing!', emoji: '😊');
+  }
+  if (score == total) {
+    return (title: 'Perfect Round!', emoji: '🏆');
+  }
+  if (score >= (total / 2).ceil()) {
+    return (title: 'Great Job!', emoji: '🌟');
+  }
+  if (score > 0) {
+    return (title: 'Nice Try!', emoji: '💪');
+  }
+  return (title: 'Keep Practicing!', emoji: '😊');
+}
+
 enum _RoundStage { loading, question, feedback, summary }
 
 /// One question in a round: a target word to listen for, and the set of
@@ -159,13 +196,7 @@ class _TapTheWordPageState extends State<TapTheWordPage> {
 
     // Dedupe by text so we never treat two spellings of the same word as
     // different options.
-    final distinct = <Word>[];
-    for (final w in [...pool]..shuffle(_rand)) {
-      if (distinct.any((d) => d.text.toLowerCase() == w.text.toLowerCase())) {
-        continue;
-      }
-      distinct.add(w);
-    }
+    final distinct = dedupeWordsByText([...pool]..shuffle(_rand));
 
     // Safety net: make sure there are enough distinct words for a full
     // round, padding from the fallback pool if the real data came up short.
@@ -266,13 +297,13 @@ class _TapTheWordPageState extends State<TapTheWordPage> {
         content = const Center(child: CircularProgressIndicator());
         break;
       case _RoundStage.question:
-        content = Center(child: _buildQuestion());
+        content = _scrollableCentered(_buildQuestion());
         break;
       case _RoundStage.feedback:
-        content = Center(child: _buildQuestionFeedback());
+        content = _scrollableCentered(_buildQuestionFeedback());
         break;
       case _RoundStage.summary:
-        content = Center(child: _buildRoundSummary());
+        content = _scrollableCentered(_buildRoundSummary());
         break;
     }
 
@@ -300,6 +331,22 @@ class _TapTheWordPageState extends State<TapTheWordPage> {
           ),
         ],
       ),
+    );
+  }
+
+  /// Centers [child] vertically when it fits, but scrolls instead of
+  /// overflowing when it doesn't (e.g. smaller screens, landscape, or
+  /// split-screen). Used for all three round stages.
+  Widget _scrollableCentered(Widget child) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return SingleChildScrollView(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minHeight: constraints.maxHeight),
+            child: Center(child: child),
+          ),
+        );
+      },
     );
   }
 
@@ -461,23 +508,9 @@ class _TapTheWordPageState extends State<TapTheWordPage> {
   Widget _buildRoundSummary() {
     final total = _questions.length;
     final score = _score;
-
-    String title;
-    String emoji;
-
-    if (score == total) {
-      title = 'Perfect Round!';
-      emoji = '🏆';
-    } else if (score >= (total / 2).ceil()) {
-      title = 'Great Job!';
-      emoji = '🌟';
-    } else if (score > 0) {
-      title = 'Nice Try!';
-      emoji = '💪';
-    } else {
-      title = 'Keep Practicing!';
-      emoji = '😊';
-    }
+    final summary = roundSummaryFor(score: score, total: total);
+    final title = summary.title;
+    final emoji = summary.emoji;
 
     return Column(
       mainAxisSize: MainAxisSize.min,
