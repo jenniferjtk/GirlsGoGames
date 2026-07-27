@@ -472,3 +472,23 @@ Accepted after fixing backend errors
 
 Testing and Verification:
 Ran node server.js and flutter run, generated multiple stories, and confirmed they displayed correctly
+
+# Entry 22: AI Story Builder Tests (tool: ChatGPT, 7/26/26) [Kathleen]
+
+Context:
+Making tests for the new Teacher Story Builder
+
+Prompt Excerpt:
+Help me make a flutter widget test for the teacher story builder page that matches the other tests already in our project
+
+AI Summary:
+Made a simple widget test that checked the page loaded and the main ui elements were there
+
+Human Evaluation:
+The test matched the rest of our project and only needed small changes
+
+Final Decision:
+Accepted with minor changes
+
+Testing and Verification:
+Ran flutter test then flutter run opened the teacher story builder and confirmed the page loaded and stories still generated correctly
