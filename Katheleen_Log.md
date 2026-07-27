@@ -11,3 +11,24 @@ After this, I created a new AI story builder screen in flutter that allows the u
 There was an issue with the database with an ambiguous supabase relationship that I troubleshot and fixed 
 I tested extensively the AI workflow by running the app and generating dolche based stories from within the application
 
+Milestone 3: 
+
+Hours Worked: 9
+
+Started by working on the AI Story Builder and moving it from the student dashboard to the teacher dashboard so it matched the project requirements
+
+Used AI to help restructure the Story Builder into a teacher workflow where a teacher selects a student reading level and interest before generating a story
+
+Updated the flutter screen by replacing the free text prompt with dropdowns for the student reading level and interest
+
+Updated the backend to accept the selected student reading level interest and Dolch words instead of a manually entered prompt
+
+Worked through several backend errors while connecting the Story Builder including fixing request formatting and troubleshooting missing functions that prevented stories from generating correctly
+
+Removed the AI Story Builder button from the student dashboard so only teachers could generate stories as required by the assignment
+
+Tested the complete workflow multiple times by running the backend with node server.js and the Flutter application then verifying a teacher could generate stories for different students reading levels and interests
+
+Created widget tests for the Teacher Story Builder screen that matched the style of the existing project tests and verified the page loaded correctly
+
+Verified that the backend proxy was still handling all OpenAI requests and that stories were generated successfully without exposing the API key to the Flutter application
