@@ -411,3 +411,24 @@ Accpected all changes with no revision. Will continue to push UI changes to the 
 
 Testing and Verification:
 ran flutter pub get / flutter run, opened the dashboard, tested all screens and all nav bar buttons
+
+# Entry 18: Expanded Test Coverage — Tap the Word & Games Hub (tool: Claude, 7/26/26) [Karina]
+
+Context:
+Expanding automated test coverage for the newly added Tap the Word game and Games hub
+screens to meet the project's stated minimum (5 unit tests, 3 widget tests), while
+explicitly excluding anything related to the AI Story Builder feature.
+
+Prompt Excerpt:
+Asked Claude to expand the test suite to a minimum of 5 passing pure-Dart unit tests and 3 passing widget tests, instructing that new tests should avoid the AI Story Builder section entirely as another team memeber was working on it. Most of the app's game logic lives inline inside State classes mixed with async Supabase calls, making it unsuitable for pure unit testing as written. Guided AI to write tests based on the previous code it created.
+
+AI Summary:
+To make unit testing possible, Claude extracted two pieces of pure logic out of tap_the_word.dart into standalone top-level functions — dedupeWordsByText() (case-insensitive duplicate removal) and roundSummaryFor() (score-to-title/emoji mapping) — without changing any
+runtime behavior. It then wrote 7 pure Dart unit tests covering both functions' edge cases, and 4 widget tests covering the Tap the Word screen (rendering and tap-to-advance interaction), the Games hub (content rendering), and the renamed bottom nav tab. 
+
+Human Evluation: Tested the tests given, and recieved 2 failed tests. compared which tests failed, and discovered a bug, not the test case failing. Gave the bug back to claude for a round of debugging.
+
+Final Verdict: Accpected and Caught a bug. 
+
+Testing and Verification: ran 'flutter test' to confirm all 11 new tests pass, checked whether the
+three pre-existing tests pass or fail as suspected
