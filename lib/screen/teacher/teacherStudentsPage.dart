@@ -1,4 +1,4 @@
-// lib/screen/teacher/teacherStudents.dart
+// lib/screen/teacher/teacherStudentsPage.dart
 //
 // The Students tab — the single home for the roster.
 //
@@ -32,9 +32,10 @@ class TeacherStudentsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Shares the hoisted TeacherProvider from main.dart — see the note in
-    // teacherDashboard.dart.
-    return const _TeacherStudentsView();
+    return ChangeNotifierProvider(
+      create: (_) => TeacherProvider(),
+      child: const _TeacherStudentsView(),
+    );
   }
 }
 

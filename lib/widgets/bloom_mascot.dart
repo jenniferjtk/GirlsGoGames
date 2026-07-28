@@ -36,7 +36,17 @@ class BloomMascot extends StatelessWidget {
   final double size;
   final BloomMood mood;
 
-  const BloomMascot({super.key, required this.size, this.mood = BloomMood.idle});
+  /// Reading glasses. Used on the teacher side of the app: same mascot, one
+  /// costume change, so a teacher sees the character their students see while
+  /// still knowing whose screen they're on.
+  final bool glasses;
+
+  const BloomMascot({
+    super.key,
+    required this.size,
+    this.mood = BloomMood.idle,
+    this.glasses = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -44,7 +54,7 @@ class BloomMascot extends StatelessWidget {
       child: SizedBox(
         width: size,
         height: size,
-        child: CustomPaint(painter: _BloomPainter(mood)),
+        child: CustomPaint(painter: _BloomPainter(mood, glasses)),
       ),
     );
   }
@@ -52,8 +62,9 @@ class BloomMascot extends StatelessWidget {
 
 class _BloomPainter extends CustomPainter {
   final BloomMood mood;
+  final bool glasses;
 
-  _BloomPainter(this.mood);
+  _BloomPainter(this.mood, this.glasses);
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -175,6 +186,48 @@ class _BloomPainter extends CustomPainter {
         break;
     }
 
+    // Reading glasses, drawn over the eyes so the expression still reads
+    // through the lenses.
+    if (glasses) {
+      final lensR = eyeR * 2.05;
+      final lensPaint = Paint()..color = Colors.white.withOpacity(0.28);
+      final framePaint = Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = r * 0.075
+        ..strokeCap = StrokeCap.round
+        ..color = RRColor.ink;
+
+      for (final dx in [-eyeDx, eyeDx]) {
+        final lens = RRect.fromRectAndRadius(
+          Rect.fromCenter(
+              center: Offset(cx + dx, eyeY),
+              width: lensR * 2,
+              height: lensR * 1.65),
+          Radius.circular(lensR * 0.7),
+        );
+        canvas.drawRRect(lens, lensPaint);
+        canvas.drawRRect(lens, framePaint);
+      }
+
+      // Bridge
+      canvas.drawLine(
+        Offset(cx - eyeDx + lensR, eyeY),
+        Offset(cx + eyeDx - lensR, eyeY),
+        framePaint,
+      );
+      // Temple arms
+      canvas.drawLine(
+        Offset(cx - eyeDx - lensR, eyeY),
+        Offset(cx - eyeDx - lensR - r * 0.22, eyeY - r * 0.09),
+        framePaint,
+      );
+      canvas.drawLine(
+        Offset(cx + eyeDx + lensR, eyeY),
+        Offset(cx + eyeDx + lensR + r * 0.22, eyeY - r * 0.09),
+        framePaint,
+      );
+    }
+
     // Cheeks
     if (mood != BloomMood.sleepy) {
       for (final dx in [-r * 0.60, r * 0.60]) {
@@ -240,5 +293,6 @@ class _BloomPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(_BloomPainter old) => old.mood != mood;
+  bool shouldRepaint(_BloomPainter old) =>
+      old.mood != mood || old.glasses != glasses;
 }

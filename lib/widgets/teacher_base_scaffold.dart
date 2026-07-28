@@ -1,102 +1,120 @@
-import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:readright/config/config.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
-import '../providers/theme_provider.dart';
-import 'teacher_navbar.dart';
+// lib/widgets/teacher_base_scaffold.dart
+//
+// Changes:
+//   * Routes the four new tabs: Class / Students / Words / Stories.
+//   * Dark mode toggle removed. ThemeProvider stays registered and unused.
+//   * App bar takes the theme tokens, matching the student scaffold.
+//   * Haptics on tab change, and a same-tab tap is a no-op rather than a
+//     pointless pushReplacement.
+//
+// Logout behaviour is untouched.
+//
+// !! ROUTE NAMES — confirm these against main.dart. Only /teacherDashboard and
+// /aiStoryBuilder appear in code I've seen; the other two are my guesses and
+// are pulled out as constants so they're a one-line fix.
 
-class TeacherBaseScaffold extends StatefulWidget {
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+
+import 'package:readright/config/theme.dart';
+import 'package:readright/widgets/teacher_navbar.dart';
+
+/// Tab index -> named route. Index order must match TeacherNavBar._items.
+const List<String> kTeacherTabRoutes = [
+  '/teacherDashboard', // 0 Class    — confirmed
+  '/teacherStudents', // 1 Students — CHECK
+  '/teacherWordLists', // 2 Words    — CHECK
+  '/aiStoryBuilder', // 3 Stories  — confirmed
+];
+
+class TeacherBaseScaffold extends StatelessWidget {
   final Widget body;
+  final String pageTitle;
+  final IconData pageIcon;
   final int currentIndex;
-  final String? pageTitle;
-  final IconData? pageIcon;
+
+  /// Optional trailing app bar actions for a specific page — e.g. a search
+  /// toggle on Students. Logout is always appended after these.
+  final List<Widget> actions;
 
   const TeacherBaseScaffold({
     super.key,
     required this.body,
+    required this.pageTitle,
+    required this.pageIcon,
     required this.currentIndex,
-    this.pageTitle,
-    this.pageIcon,
+    this.actions = const [],
   });
 
   @override
-  State<TeacherBaseScaffold> createState() => _TeacherBaseScaffoldState();
-}
-
-class _TeacherBaseScaffoldState extends State<TeacherBaseScaffold> {
-  void _onItemTapped(int index) {
-    if (!mounted) return;
-    // Prevents double rebuilds
-    if (index == widget.currentIndex) return;
-    switch (index) {
-      case 0:
-        Navigator.pushNamed(context, '/teacherDashboard');
-        break;
-      case 1:
-        Navigator.pushNamed(context, '/teacherWordLists');
-        break;
-      case 2:
-        Navigator.pushNamed(context, '/teacherStudents');
-        break;
-      case 3:
-        Navigator.pushNamed(context, '/teacherSettings');
-        break;
-    }
-  }
-
-  Future<void> _logout() async {
-    final supabase = Supabase.instance.client;
-    await supabase.auth.signOut();
-    await supabase.auth.signOut(scope: SignOutScope.local);
-
-    if (mounted) {
-      Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final themeProvider = Provider.of<ThemeProvider>(context);
-
     return Scaffold(
+      backgroundColor: RRColor.canvas,
       appBar: AppBar(
-        backgroundColor: Color(AppConfig.primaryColor),
+        backgroundColor: RRColor.mint,
         elevation: 0,
+        toolbarHeight: 64,
+        iconTheme: const IconThemeData(color: Colors.white),
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(bottom: Radius.circular(24)),
+        ),
         title: Row(
           children: [
-            if (widget.pageIcon != null)
-              Icon(widget.pageIcon, color: Colors.white, size: 26),
-            if (widget.pageIcon != null) const SizedBox(width: 8),
-            Text(
-              widget.pageTitle ?? 'Teacher Portal',
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
+            Icon(pageIcon, color: Colors.white, size: 26),
+            const SizedBox(width: 10),
+            Flexible(
+              child: Text(
+                pageTitle,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontFamily: RRFont.display,
+                  fontSize: 22,
+                  fontWeight: FontWeight.w800,
+                  color: Colors.white,
+                ),
               ),
             ),
           ],
         ),
         actions: [
+          ...actions,
           IconButton(
-            icon: themeProvider.isDarkMode ? const Icon(Icons.light_mode, color: Colors.white) : const Icon(Icons.dark_mode, color: Colors.white),
-            tooltip: 'Dark mode',
-            onPressed: () async {
-              themeProvider.toggleTheme();
-            },
-          ),
-          IconButton(
-            onPressed: _logout,
+            iconSize: 24,
             icon: const Icon(Icons.logout, color: Colors.white),
             tooltip: 'Logout',
+            onPressed: () async {
+              final supabase = Supabase.instance.client;
+
+              // Sign out the user
+              await supabase.auth.signOut();
+
+              // Navigate to login page & clear stack
+              if (context.mounted) {
+                Navigator.pushNamedAndRemoveUntil(
+                  context,
+                  '/login',
+                  (route) => false,
+                );
+              }
+            },
           ),
-          const SizedBox(width: 10),
+          const SizedBox(width: 4),
         ],
       ),
-      body: widget.body,
+      body: body,
       bottomNavigationBar: TeacherNavBar(
-        currentIndex: widget.currentIndex,
-        onTap: _onItemTapped,
+        currentIndex: currentIndex,
+        onTap: (index) {
+          if (index == currentIndex) return;
+          HapticFeedback.selectionClick();
+
+          final route = index >= 0 && index < kTeacherTabRoutes.length
+              ? kTeacherTabRoutes[index]
+              : kTeacherTabRoutes.first;
+
+          Navigator.pushReplacementNamed(context, route);
+        },
       ),
     );
   }

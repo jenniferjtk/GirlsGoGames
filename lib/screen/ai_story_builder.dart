@@ -1,13 +1,37 @@
+// lib/screen/ai_story_builder.dart
+//
+// The Stories tab.
+//
+// Biggest change is structural: this was a bare Scaffold with its own green
+// AppBar, so opening it dropped a teacher out of the app entirely — no nav bar,
+// no way back except the system gesture. It now lives inside
+// TeacherBaseScaffold at index 3, which is what the new Stories tab points at.
+//
+// Design changes:
+//   * Reading level and interest become chip grids instead of dropdowns. Ten
+//     interests behind a dropdown is ten taps to browse; as chips it's one
+//     glance, and the emoji make it scannable.
+//   * Generation can take up to 60 seconds, and the old screen showed only a
+//     18px spinner inside the button. There's now a real waiting state.
+//   * The story result is set for reading, not for inspecting a payload.
+//
+// All logic is unchanged: the backend URLs, the Dolch lookup, the POST, the
+// timeout, and the JSON handling are all exactly as they were.
+
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
+import 'package:readright/config/theme.dart';
 import 'package:readright/providers/teacherProvider.dart';
 import 'package:readright/services/databaseHelper.dart';
+import 'package:readright/widgets/auth_ui.dart';
+import 'package:readright/widgets/bloom_mascot.dart';
+import 'package:readright/widgets/teacher_base_scaffold.dart';
 
 class AIStoryBuilderPage extends StatefulWidget {
   const AIStoryBuilderPage({super.key});
@@ -45,6 +69,21 @@ class _AIStoryBuilderPageState extends State<AIStoryBuilderPage> {
     'Farm',
     'Adventure',
   ];
+
+  /// Presentation only — the string sent to the backend is still the plain
+  /// label above.
+  static const Map<String, String> _interestEmoji = <String, String>{
+    'Animals': '🐾',
+    'Dinosaurs': '🦕',
+    'Space': '🚀',
+    'Sports': '⚽',
+    'Ocean': '🌊',
+    'Princesses': '👑',
+    'Cars': '🚗',
+    'School': '🏫',
+    'Farm': '🚜',
+    'Adventure': '🗺️',
+  };
 
   static const String _webBackendBaseUrl = 'http://localhost:3000';
   static const String _androidEmulatorBackendBaseUrl = 'http://10.0.2.2:3000';
@@ -158,6 +197,8 @@ class _AIStoryBuilderPageState extends State<AIStoryBuilderPage> {
       return;
     }
 
+    HapticFeedback.mediumImpact();
+
     setState(() {
       _isLoading = true;
       _error = null;
@@ -176,18 +217,18 @@ class _AIStoryBuilderPageState extends State<AIStoryBuilderPage> {
 
       final response = await http
           .post(
-        Uri.parse('$_backendBaseUrl/generate-story'),
-        headers: const <String, String>{
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode(<String, dynamic>{
-          'studentId': student.id,
-          'studentName': student.name,
-          'readingLevel': _selectedLevel,
-          'interest': _selectedInterest,
-          'dolchWords': dolchWords,
-        }),
-      )
+            Uri.parse('$_backendBaseUrl/generate-story'),
+            headers: const <String, String>{
+              'Content-Type': 'application/json',
+            },
+            body: jsonEncode(<String, dynamic>{
+              'studentId': student.id,
+              'studentName': student.name,
+              'readingLevel': _selectedLevel,
+              'interest': _selectedInterest,
+              'dolchWords': dolchWords,
+            }),
+          )
           .timeout(const Duration(seconds: 60));
 
       if (!mounted) return;
@@ -240,62 +281,47 @@ class _AIStoryBuilderPageState extends State<AIStoryBuilderPage> {
       builder: (context, provider, _) {
         final students = provider.students;
         final selectedStudentStillExists =
-        students.any((student) => student.id == _selectedStudentId);
+            students.any((student) => student.id == _selectedStudentId);
 
         if (!selectedStudentStillExists) {
           _selectedStudentId = null;
         }
 
-        return Scaffold(
-          appBar: AppBar(
-            title: const Text('Teacher Story Builder'),
-            backgroundColor: Colors.green,
-            foregroundColor: Colors.white,
-          ),
+        return TeacherBaseScaffold(
+          currentIndex: 3,
+          pageTitle: 'Stories',
+          pageIcon: Icons.auto_stories_rounded,
           body: SafeArea(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   _buildIntroCard(),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 18),
                   _buildSelectionCard(
                     context,
                     students,
                     provider.dashboardLoading,
                   ),
-                  const SizedBox(height: 16),
-                  ElevatedButton.icon(
-                    onPressed:
-                    _isLoading || students.isEmpty
-                        ? null
-                        : () => _generateStory(students),
-                    icon:
-                    _isLoading
-                        ? const SizedBox(
-                      height: 18,
-                      width: 18,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                        : const Icon(Icons.auto_stories),
-                    label: Text(
-                      _isLoading ? 'Generating...' : 'Generate Story',
-                    ),
-                    style: ElevatedButton.styleFrom(
-                      minimumSize: const Size.fromHeight(52),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 18),
+                  _buildGenerateButton(students),
+                  const SizedBox(height: 10),
                   Text(
                     'Backend: $_backendBaseUrl',
                     textAlign: TextAlign.center,
-                    style: TextStyle(color: Colors.grey.shade700),
+                    style: RRText.aside,
                   ),
-                  const SizedBox(height: 16),
-                  if (_error != null) _buildErrorCard(_error!),
+                  if (_isLoading) ...[
+                    const SizedBox(height: 20),
+                    const _WaitingCard(),
+                  ],
+                  if (_error != null) ...[
+                    const SizedBox(height: 18),
+                    AuthMessage(text: _error!),
+                  ],
                   if (_storyResponse != null) ...[
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 18),
                     _buildResultCard(_storyResponse!),
                   ],
                 ],
@@ -307,155 +333,193 @@ class _AIStoryBuilderPageState extends State<AIStoryBuilderPage> {
     );
   }
 
+  // -------------------------------------------------------------------------
+  // Intro
+  // -------------------------------------------------------------------------
   Widget _buildIntroCard() {
-    return Card(
-      elevation: 2,
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: const [
-            Text(
-              'Generate a story for one student',
-              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+    return _Card(
+      child: Row(
+        children: [
+          const BloomMascot(size: 72, mood: BloomMood.happy, glasses: true),
+          const SizedBox(width: 14),
+          const Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Write a story',
+                  style: TextStyle(
+                    fontFamily: RRFont.display,
+                    fontSize: 24,
+                    fontWeight: FontWeight.w800,
+                    height: 1.1,
+                    color: RRColor.ink,
+                  ),
+                ),
+                SizedBox(height: 4),
+                Text(
+                  'Pick a student, a level, and something they like. '
+                  'The story is built from that level’s Dolch words.',
+                  style: RRText.body,
+                ),
+              ],
             ),
-            SizedBox(height: 8),
-            Text(
-              'Pick a student, reading level, and interest. The backend proxy will build the prompt and return an age-appropriate story.',
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 
+  // -------------------------------------------------------------------------
+  // Settings
+  // -------------------------------------------------------------------------
   Widget _buildSelectionCard(
-      BuildContext context,
-      List<StudentDashboardItem> students,
-      bool dashboardLoading,
-      ) {
-    final theme = Theme.of(context);
+    BuildContext context,
+    List<StudentDashboardItem> students,
+    bool dashboardLoading,
+  ) {
     final studentExists =
-    students.any((student) => student.id == _selectedStudentId);
+        students.any((student) => student.id == _selectedStudentId);
 
-    return Card(
-      elevation: 2,
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              'Story settings',
-              style: theme.textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
+    return _Card(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const _SectionLabel('Student'),
+          const SizedBox(height: 10),
+          DropdownButtonFormField<String>(
+            initialValue: studentExists ? _selectedStudentId : null,
+            borderRadius: BorderRadius.circular(16),
+            decoration: authField('Student'),
+            items: students
+                .map(
+                  (student) => DropdownMenuItem<String>(
+                    value: student.id,
+                    child: Text(student.name),
+                  ),
+                )
+                .toList(),
+            onChanged: students.isEmpty
+                ? null
+                : (value) {
+                    setState(() {
+                      _selectedStudentId = value;
+                      _error = null;
+                    });
+                  },
+            hint: dashboardLoading
+                ? const Text('Loading students...')
+                : students.isEmpty
+                    ? const Text('No students found')
+                    : const Text('Choose a student'),
+          ),
+
+          if (students.isEmpty) ...[
+            const SizedBox(height: 10),
+            const Text(
+              'No students in this class yet. Add them from the Students tab.',
+              style: TextStyle(
+                fontFamily: RRFont.reader,
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: RRColor.sunnyInk,
               ),
             ),
-            const SizedBox(height: 12),
-            DropdownButtonFormField<String>(
-              value: studentExists ? _selectedStudentId : null,
-              decoration: const InputDecoration(
-                labelText: 'Student',
-                border: OutlineInputBorder(),
-              ),
-              items:
-              students
-                  .map(
-                    (student) => DropdownMenuItem<String>(
-                  value: student.id,
-                  child: Text(student.name),
-                ),
-              )
-                  .toList(),
-              onChanged:
-              students.isEmpty
-                  ? null
-                  : (value) {
-                setState(() {
-                  _selectedStudentId = value;
-                  _error = null;
-                });
-              },
-              hint:
-              dashboardLoading
-                  ? const Text('Loading students...')
-                  : students.isEmpty
-                  ? const Text('No students found')
-                  : const Text('Choose a student'),
-            ),
-            const SizedBox(height: 12),
-            DropdownButtonFormField<String>(
-              value: _selectedLevel,
-              decoration: const InputDecoration(
-                labelText: 'Reading level',
-                border: OutlineInputBorder(),
-              ),
-              items:
-              _levels
-                  .map(
-                    (level) => DropdownMenuItem<String>(
-                  value: level,
-                  child: Text(level),
-                ),
-              )
-                  .toList(),
-              onChanged: (value) {
-                if (value == null) return;
-                setState(() {
-                  _selectedLevel = value;
-                  _error = null;
-                });
-              },
-            ),
-            const SizedBox(height: 12),
-            DropdownButtonFormField<String>(
-              value: _selectedInterest,
-              decoration: const InputDecoration(
-                labelText: 'Interest',
-                border: OutlineInputBorder(),
-              ),
-              items:
-              _interests
-                  .map(
-                    (interest) => DropdownMenuItem<String>(
-                  value: interest,
-                  child: Text(interest),
-                ),
-              )
-                  .toList(),
-              onChanged: (value) {
-                if (value == null) return;
-                setState(() {
-                  _selectedInterest = value;
-                  _error = null;
-                });
-              },
-            ),
-            const SizedBox(height: 12),
-            if (students.isEmpty)
-              const Text(
-                'Load students in the teacher dashboard first.',
-                style: TextStyle(color: Colors.orange),
-              ),
           ],
+
+          const SizedBox(height: 22),
+          const _SectionLabel('Reading level'),
+          const SizedBox(height: 10),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: _levels
+                .map(
+                  (level) => _ChoiceChip(
+                    label: level,
+                    selected: _selectedLevel == level,
+                    surface: RRColor.mintSurface,
+                    edge: RRColor.mint,
+                    ink: RRColor.mintInk,
+                    onTap: () {
+                      HapticFeedback.selectionClick();
+                      setState(() {
+                        _selectedLevel = level;
+                        _error = null;
+                      });
+                    },
+                  ),
+                )
+                .toList(),
+          ),
+
+          const SizedBox(height: 22),
+          const _SectionLabel('Interest'),
+          const SizedBox(height: 10),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: _interests
+                .map(
+                  (interest) => _ChoiceChip(
+                    label: interest,
+                    emoji: _interestEmoji[interest],
+                    selected: _selectedInterest == interest,
+                    surface: RRColor.skySurface,
+                    edge: RRColor.sky,
+                    ink: RRColor.skyInk,
+                    onTap: () {
+                      HapticFeedback.selectionClick();
+                      setState(() {
+                        _selectedInterest = interest;
+                        _error = null;
+                      });
+                    },
+                  ),
+                )
+                .toList(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildGenerateButton(List<StudentDashboardItem> students) {
+    final disabled = _isLoading || students.isEmpty;
+
+    return SizedBox(
+      height: 62,
+      child: ElevatedButton.icon(
+        onPressed: disabled ? null : () => _generateStory(students),
+        icon: Icon(
+          _isLoading ? Icons.hourglass_top_rounded : Icons.auto_stories_rounded,
+          size: 24,
+        ),
+        label: Text(
+          _isLoading ? 'Writing…' : 'Generate story',
+          style: const TextStyle(
+            fontFamily: RRFont.display,
+            fontSize: 20,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: RRColor.blossom,
+          foregroundColor: Colors.white,
+          disabledBackgroundColor: RRColor.lilac,
+          disabledForegroundColor: Colors.white,
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(22),
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildErrorCard(String message) {
-    return Card(
-      color: Colors.redAccent.shade100.withOpacity(0.15),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Text(
-          message,
-          style: const TextStyle(color: Colors.red, fontSize: 16),
-        ),
-      ),
-    );
-  }
-
+  // -------------------------------------------------------------------------
+  // Result
+  // -------------------------------------------------------------------------
   Widget _buildResultCard(Map<String, dynamic> data) {
     final title = data['title']?.toString().trim();
     final story = data['story']?.toString().trim() ?? '';
@@ -466,51 +530,332 @@ class _AIStoryBuilderPageState extends State<AIStoryBuilderPage> {
         ? (data['dolchWordsUsed'] as List).map((e) => e.toString()).toList()
         : <String>[];
 
-    return Card(
-      elevation: 2,
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              title?.isNotEmpty == true ? title! : 'Generated story',
-              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Student: ${studentName?.isNotEmpty == true ? studentName : 'Selected student'}',
-            ),
-            Text('Level: $level'),
-            Text('Interest: $interest'),
-            const SizedBox(height: 16),
-            Text(
-              story.isNotEmpty ? story : 'No story text was returned.',
-              style: const TextStyle(fontSize: 18, height: 1.4),
-            ),
-            if (dolchWordsUsed.isNotEmpty) ...[
-              const SizedBox(height: 16),
-              const Text(
-                'Dolch words used',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 8),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children:
-                dolchWordsUsed
-                    .map(
-                      (word) => Chip(
-                    label: Text(word),
-                    visualDensity: VisualDensity.compact,
+    return _Card(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Text(
+                  title?.isNotEmpty == true ? title! : 'Generated story',
+                  style: const TextStyle(
+                    fontFamily: RRFont.display,
+                    fontSize: 26,
+                    fontWeight: FontWeight.w800,
+                    height: 1.15,
+                    color: RRColor.ink,
                   ),
-                )
-                    .toList(),
+                ),
+              ),
+              IconButton(
+                tooltip: 'Copy story',
+                color: RRColor.inkSoft,
+                icon: const Icon(Icons.copy_rounded, size: 22),
+                onPressed: story.isEmpty
+                    ? null
+                    : () {
+                        Clipboard.setData(ClipboardData(text: story));
+                        HapticFeedback.mediumImpact();
+                        ScaffoldMessenger.of(context)
+                          ..hideCurrentSnackBar()
+                          ..showSnackBar(
+                            const SnackBar(
+                              content: Text('Story copied'),
+                              duration: Duration(seconds: 2),
+                            ),
+                          );
+                      },
               ),
             ],
+          ),
+          const SizedBox(height: 10),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              _MetaChip(
+                icon: Icons.person_rounded,
+                label: studentName?.isNotEmpty == true
+                    ? studentName!
+                    : 'Selected student',
+                surface: RRColor.mintSurface,
+                edge: RRColor.mint,
+                ink: RRColor.mintInk,
+              ),
+              _MetaChip(
+                icon: Icons.stairs_rounded,
+                label: level,
+                surface: RRColor.skySurface,
+                edge: RRColor.sky,
+                ink: RRColor.skyInk,
+              ),
+              _MetaChip(
+                icon: Icons.favorite_rounded,
+                label: interest,
+                surface: RRColor.blossomSurface,
+                edge: RRColor.blossom,
+                ink: RRColor.blossomInk,
+              ),
+            ],
+          ),
+          const SizedBox(height: 18),
+
+          // The story itself. Set for reading aloud to a child: generous line
+          // height, wide letter spacing, and a soft page rather than white.
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(18),
+            decoration: BoxDecoration(
+              color: RRColor.canvas,
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: RRColor.lilac, width: 2),
+            ),
+            child: Text(
+              story.isNotEmpty ? story : 'No story text was returned.',
+              style: const TextStyle(
+                fontFamily: RRFont.reader,
+                fontSize: 19,
+                height: 1.7,
+                letterSpacing: 0.3,
+                color: RRColor.ink,
+              ),
+            ),
+          ),
+
+          if (dolchWordsUsed.isNotEmpty) ...[
+            const SizedBox(height: 18),
+            const _SectionLabel('Dolch words used'),
+            const SizedBox(height: 10),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: dolchWordsUsed
+                  .map(
+                    (word) => Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: RRColor.sunnyGlow,
+                        borderRadius:
+                            BorderRadius.circular(RRShape.radiusChip),
+                        border:
+                            Border.all(color: RRColor.sunny, width: 1.5),
+                      ),
+                      child: Text(
+                        word,
+                        style: const TextStyle(
+                          fontFamily: RRFont.reader,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: 0.3,
+                          color: RRColor.sunnyInk,
+                        ),
+                      ),
+                    ),
+                  )
+                  .toList(),
+            ),
           ],
+        ],
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Pieces
+// ---------------------------------------------------------------------------
+class _Card extends StatelessWidget {
+  final Widget child;
+
+  const _Card({required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: RRColor.card,
+        borderRadius: BorderRadius.circular(RRShape.radiusCard),
+        border: Border.all(color: RRColor.lilac, width: 2.5),
+        boxShadow: RRShape.lift(RRColor.lilac),
+      ),
+      child: child,
+    );
+  }
+}
+
+class _SectionLabel extends StatelessWidget {
+  final String text;
+
+  const _SectionLabel(this.text);
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      text,
+      style: const TextStyle(
+        fontFamily: RRFont.display,
+        fontSize: 17,
+        fontWeight: FontWeight.w800,
+        color: RRColor.ink,
+      ),
+    );
+  }
+}
+
+/// A selectable chip. Selection is a fill plus a thicker border plus a check,
+/// not colour alone.
+class _ChoiceChip extends StatelessWidget {
+  final String label;
+  final String? emoji;
+  final bool selected;
+  final Color surface;
+  final Color edge;
+  final Color ink;
+  final VoidCallback onTap;
+
+  const _ChoiceChip({
+    required this.label,
+    required this.selected,
+    required this.surface,
+    required this.edge,
+    required this.ink,
+    required this.onTap,
+    this.emoji,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      button: true,
+      selected: selected,
+      label: label,
+      excludeSemantics: true,
+      child: GestureDetector(
+        onTap: onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 130),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          decoration: BoxDecoration(
+            color: selected ? surface : RRColor.card,
+            borderRadius: BorderRadius.circular(RRShape.radiusChip),
+            border: Border.all(
+              color: selected ? ink : RRColor.lilac,
+              width: selected ? 2.5 : 1.5,
+            ),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (selected) ...[
+                Icon(Icons.check_rounded, size: 16, color: ink),
+                const SizedBox(width: 6),
+              ] else if (emoji != null) ...[
+                Text(emoji!, style: const TextStyle(fontSize: 15)),
+                const SizedBox(width: 6),
+              ],
+              Text(
+                label,
+                style: TextStyle(
+                  fontFamily: RRFont.reader,
+                  fontSize: 15,
+                  fontWeight: selected ? FontWeight.w800 : FontWeight.w600,
+                  color: selected ? ink : RRColor.inkSoft,
+                ),
+              ),
+            ],
+          ),
         ),
+      ),
+    );
+  }
+}
+
+class _MetaChip extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final Color surface;
+  final Color edge;
+  final Color ink;
+
+  const _MetaChip({
+    required this.icon,
+    required this.label,
+    required this.surface,
+    required this.edge,
+    required this.ink,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: surface,
+        borderRadius: BorderRadius.circular(RRShape.radiusChip),
+        border: Border.all(color: edge, width: 1.5),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 15, color: ink),
+          const SizedBox(width: 6),
+          Text(
+            label,
+            style: TextStyle(
+              fontFamily: RRFont.reader,
+              fontSize: 13,
+              fontWeight: FontWeight.w700,
+              color: ink,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Waiting state. Generation is allowed up to 60 seconds, and an 18px spinner
+/// inside a button is not enough signal for a wait that long — it reads as a
+/// hang. This says something is happening and roughly how long it takes.
+class _WaitingCard extends StatelessWidget {
+  const _WaitingCard();
+
+  @override
+  Widget build(BuildContext context) {
+    return _Card(
+      child: Column(
+        children: const [
+          BloomMascot(size: 90, mood: BloomMood.happy, glasses: true),
+          SizedBox(height: 14),
+          Text(
+            'Writing the story…',
+            style: TextStyle(
+              fontFamily: RRFont.display,
+              fontSize: 20,
+              fontWeight: FontWeight.w800,
+              color: RRColor.ink,
+            ),
+          ),
+          SizedBox(height: 6),
+          Text(
+            'This can take up to a minute.',
+            textAlign: TextAlign.center,
+            style: RRText.body,
+          ),
+          SizedBox(height: 16),
+          SizedBox(
+            width: 140,
+            child: LinearProgressIndicator(
+              minHeight: 10,
+              backgroundColor: RRColor.lilacSurface,
+              color: RRColor.blossom,
+            ),
+          ),
+        ],
       ),
     );
   }
