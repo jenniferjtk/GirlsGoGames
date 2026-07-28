@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:readright/providers/theme_provider.dart';
-import 'package:readright/screen/tap_the_word.dart';
+import 'package:readright/screen/student/tap_the_word.dart';
 
 Widget _buildTestApp() {
   return ChangeNotifierProvider<ThemeProvider>(

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:readright/screen/progress.dart';
+import 'package:readright/screen/student/progress.dart';
 
 import '../helpers/pump_app.dart';
 

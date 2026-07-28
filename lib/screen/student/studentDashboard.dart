@@ -266,7 +266,7 @@ class _WordNest extends StatelessWidget {
     if (total == 0) return 'Your words are on the way.';
     if (progress >= 1.0) return 'You got them all!';
     if (progress > 0) return 'Nice reading. Keep going.';
-    return 'Tap Games to learn your first word.';
+    return 'Tap  🎮Games to Start!';
   }
 
   @override
@@ -664,7 +664,7 @@ class _EmptyRecent extends StatelessWidget {
           const SizedBox(width: 16),
           const Expanded(
             child: Text(
-              'Tap  🎮Games to start reading!',
+              'Tap  🎮Games to Start!',
               style: RRText.body,
             ),
           ),

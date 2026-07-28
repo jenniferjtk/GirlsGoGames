@@ -12,14 +12,14 @@ import 'package:readright/providers/studentDashboardProvider.dart';
 import 'package:readright/providers/teacherProvider.dart';
 
 // Screens
-import 'package:readright/screen/login.dart';
-import 'package:readright/screen/signup.dart';
-import 'package:readright/screen/resetPassword.dart';
-import 'package:readright/screen/studentDashboard.dart';
-import 'package:readright/screen/progress.dart';
-import 'package:readright/screen/practice.dart';
-import 'package:readright/screen/wordList.dart';
-import 'package:readright/screen/feedback.dart';
+import 'package:readright/screen/auth/login.dart';
+import 'package:readright/screen/auth/signup.dart';
+import 'package:readright/screen/auth/resetPassword.dart';
+import 'package:readright/screen/student/studentDashboard.dart';
+import 'package:readright/screen/student/progress.dart';
+import 'package:readright/screen/student/practice.dart';
+import 'package:readright/screen/student/wordList.dart';
+import 'package:readright/screen/student/feedback.dart';
 import 'package:readright/models/assessment_result.dart';
 import 'package:readright/screen/teacher/teacherDashboard.dart';
 import 'package:readright/screen/teacher/teacherWordLists.dart';
@@ -27,8 +27,8 @@ import 'package:readright/screen/teacher/teacherStudents.dart';
 import 'package:readright/screen/teacher/teacherSettings.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:readright/screen/ai_story_builder.dart';
-import 'package:readright/screen/tap_the_word.dart';
-import 'package:readright/screen/games.dart';
+import 'package:readright/screen/student/tap_the_word.dart';
+import 'package:readright/screen/student/games.dart';
 
 
 Future<void> main() async {

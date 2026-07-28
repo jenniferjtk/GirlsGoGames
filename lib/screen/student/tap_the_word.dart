@@ -1,37 +1,3 @@
-// lib/pages/tap_the_word.dart
-//
-// 'Tap the Word' — listen, then pick.
-//
-// Design changes:
-//   * Reads as a game, not a form. A round HUD with gem slots, a pulsing
-//     listen disc as the centrepiece, and three answer cards that press in.
-//   * Each option is visually its own object — own colour, own hard border,
-//     own shadow, 18dp of air between — instead of three identical bars.
-//   * Rewards land in the moment: confetti on a correct pick, Bloom cheering,
-//     stars that pop in one at a time on the summary.
-//   * Hardened against button mashing. Details below.
-//
-// BUTTON-MASH HARDENING — the one place I changed behaviour, because you asked
-// for it. Four separate holes, all reachable by a six-year-old drumming on the
-// screen with both hands:
-//
-//   1. `_goToNext` had no stage guard. Two fast taps on 'Next Word' ran it
-//      twice, incrementing `_currentIndex` twice and skipping a question — or
-//      running off the end of `_questions` into a RangeError.
-//   2. `_startNewRound` had no re-entry guard. Mashing 'Play Again' fired
-//      overlapping async pool fetches whose setStates interleaved, producing a
-//      round built from two different shuffles.
-//   3. Tap-through. Answer cards and the 'Next' button occupy overlapping
-//      screen space across a stage change, so a tap still travelling down when
-//      the stage flips lands on whatever appeared underneath it. Every stage
-//      change now locks input for 450ms.
-//   4. Speech pile-up. Hammering the listen disc queued utterances that played
-//      over each other and kept talking into the next question. Every `_speak`
-//      now stops the previous one first.
-//
-// Round construction, the Supabase fetch, scoring, and the two pure helpers are
-// untouched.
-
 import 'dart:math';
 
 import 'package:confetti/confetti.dart';

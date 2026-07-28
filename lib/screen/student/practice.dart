@@ -9,8 +9,8 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:io';
 import 'package:record/record.dart';
-import '../models/assessment_result.dart';
-import '../services/pronunciation_assessor.dart';
+import '../../models/assessment_result.dart';
+import '../../services/pronunciation_assessor.dart';
 import 'package:confetti/confetti.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 

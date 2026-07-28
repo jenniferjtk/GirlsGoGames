@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:readright/models/assessment_result.dart';
-import 'package:readright/screen/feedback.dart';
+import 'package:readright/screen/student/feedback.dart';
 
 import '../helpers/pump_app.dart';
 

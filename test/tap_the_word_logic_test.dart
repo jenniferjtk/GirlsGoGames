@@ -3,7 +3,7 @@
 // roundSummaryFor), which doesn't depend on Flutter or the network.
 import 'package:flutter_test/flutter_test.dart';
 import 'package:readright/models/word.dart';
-import 'package:readright/screen/tap_the_word.dart';
+import 'package:readright/screen/student/tap_the_word.dart';
 
 Word _w(String text) => Word(id: text, text: text, type: 'word', sentences: []);
 

@@ -1,7 +1,7 @@
 // test/screens/practice_page_test.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:readright/screen/practice.dart';
+import 'package:readright/screen/student/practice.dart';
 
 import '../helpers/pump_app.dart';
 
