@@ -532,3 +532,23 @@ Rejected and refreshing conversation and prompt method.
 
 Testing and Verification:
 Paste each code change by file, and test all button smashing, and ux intentions
+
+# Entry 23: UX/UI Theme Changes (tool: Claude, 7/27/26) [Karina]
+
+Context:
+ReadRight is a class-project Flutter app teaching Dolch sight words to pre-primer through 3rd grade students, targeting Chrome and a Pixel 6 emulator in portrait only. The goal was a UX/UI pass across the student-facing screens: playful but professional, large type, tactile and audio feedback, mascot and theme — with children expected to navigate practice and game modes independently. The explicit non-goal was changing any underlying procedures: Supabase queries, provider loads, scoring, and auth logic all had to stay intact, and layout restructuring required permission first.
+
+Prompt Excerpt:
+I fed screens one at a time and asked for redesigns: merge the student dashboard with the progress page, cut the games button, redesign the nav bar, word list, Tap the Word game, games hub, and the three auth screens. Along the way I asked for text-to-speech on word taps reusing practice.dart's method, mash-proofing for the game, icon-only controls on the game's end screens, and a distinct mascot pose per auth page.
+
+AI Summary:
+Produced a token file (theme.dart) splitting the brief's palette into accessible surface/glow/base/ink roles, a CustomPaint mascot named Bloom with five moods, and redesigned each screen against that language. Recurring moves: replacing percentages and raw scores with countable and face-based visuals, converting flat buttons into discrete pressable objects with haptics, and adding shape or icon redundancy wherever color was the only signal. Each response ended with justifications for design calls and flagged open questions or additions made beyond the ask.
+
+Human Evaluation:
+Mostly accepted the work and kept feeding new screens, but pushed back when the stats card was cut from the merged dashboard without asking first — a violation of the permission rule I set up front. Also caught that a compile failure was diagnosed correctly as a file-paste error on my end rather than a code defect, and corrected an incorrect assumption about which dashboard file was current.
+
+Final Decision:
+Accepted the merged dashboard, badge trail, face-based score bands, three-tab nav, tactile word cards with TTS, the game's mash guards, and the mascot-per-page auth screens. Rejected the stats card removal and had it rebuilt as a visual card with a score dial, stat tiles, and a week strip. Kept the additions that used already-fetched data like example sentences in the word list, the week strip and had emoji stripped from the game feedback screens in favor of mascot expression.
+
+Testing and Verification: 
+Read through each code and built each screen one by one, ensuring nothing broke before adding the next element. When a build was successful, pushed it before moving on.
