@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:readright/config/config.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+
+import 'package:readright/config/theme.dart';
+import 'package:readright/widgets/auth_ui.dart';
+import 'package:readright/widgets/bloom_mascot.dart';
 
 class ResetPasswordPage extends StatefulWidget {
   const ResetPasswordPage({super.key});
@@ -39,7 +42,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
 
       setState(() {
         _successText =
-        'Password reset link sent! Check your email for instructions.';
+            'Password reset link sent! Check your email for instructions.';
         _errorText = null;
       });
     } catch (e) {
@@ -58,75 +61,50 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 32),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.lock_reset,
-                  size: 80, color: Color(AppConfig.primaryColor)),
-              const SizedBox(height: 20),
-              Text(
-                'Reset Password',
-                style: TextStyle(
-                  fontSize: 26,
-                  fontWeight: FontWeight.bold,
-                  color: Color(AppConfig.secondaryColor),
+      backgroundColor: RRColor.canvas,
+      body: SafeArea(
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 32),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const AuthHeader(
+                  mood: BloomMood.confused,
+                  badge: Icons.key_rounded,
+                  badgeColor: RRColor.sky,
+                  title: 'Forgot it?',
+                  subtitle: 'Bloom forgets things too. Enter your email.',
                 ),
-              ),
-              const SizedBox(height: 30),
-              TextField(
-                controller: _emailController,
-                decoration: const InputDecoration(
-                  labelText: 'Email',
-                  border: OutlineInputBorder(),
+                const SizedBox(height: 30),
+                TextField(
+                  controller: _emailController,
+                  keyboardType: TextInputType.emailAddress,
+                  decoration: authField('Email'),
                 ),
-              ),
-              const SizedBox(height: 20),
-              if (_errorText != null)
-                Text(
-                  _errorText!,
-                  style: const TextStyle(color: Colors.red),
-                  textAlign: TextAlign.center,
+                if (_errorText != null) ...[
+                  const SizedBox(height: 18),
+                  AuthMessage(text: _errorText!),
+                ],
+                if (_successText != null) ...[
+                  const SizedBox(height: 18),
+                  AuthMessage(text: _successText!, isError: false),
+                ],
+                const SizedBox(height: 26),
+                AuthButton(
+                  label: 'Send reset link',
+                  loading: _isLoading,
+                  onPressed: _sendResetEmail,
+                  color: RRColor.sky,
                 ),
-              if (_successText != null)
-                Text(
-                  _successText!,
-                  style: const TextStyle(color: Colors.green),
-                  textAlign: TextAlign.center,
+                const SizedBox(height: 10),
+                AuthLink(
+                  label: 'Back to log in',
+                  onPressed: () =>
+                      Navigator.pushReplacementNamed(context, '/login'),
                 ),
-              const SizedBox(height: 20),
-              SizedBox(
-                width: double.infinity,
-                height: 50,
-                child: ElevatedButton(
-                  onPressed: _isLoading ? null : _sendResetEmail,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Color(AppConfig.primaryColor),
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                  child: _isLoading
-                      ? const CircularProgressIndicator(color: Colors.white)
-                      : const Text(
-                    'Send Reset Link',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-              TextButton(
-                onPressed: () =>
-                    Navigator.pushReplacementNamed(context, '/login'),
-                child: const Text('Back to Login'),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

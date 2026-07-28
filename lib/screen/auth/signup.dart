@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:readright/config/config.dart';
+
+import 'package:readright/config/theme.dart';
 import 'package:readright/services/databaseHelper.dart';
+import 'package:readright/widgets/auth_ui.dart';
+import 'package:readright/widgets/bloom_mascot.dart';
 
 class SignUpPage extends StatefulWidget {
   const SignUpPage({super.key});
@@ -109,168 +112,138 @@ class _SignUpPageState extends State<SignUpPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 32),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              children: [
-                Icon(Icons.person_add_alt_1,
-                    size: 80, color: Color(AppConfig.primaryColor)),
-                const SizedBox(height: 20),
-                Text(
-                  'Create an Account',
-                  style: TextStyle(
-                    fontSize: 26,
-                    fontWeight: FontWeight.bold,
-                    color: Color(AppConfig.secondaryColor),
+      backgroundColor: RRColor.canvas,
+      body: SafeArea(
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 32),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                children: [
+                  const AuthHeader(
+                    mood: BloomMood.cheer,
+                    badge: Icons.star_rounded,
+                    badgeColor: RRColor.sunny,
+                    title: 'Join ReadRight',
+                    subtitle: 'Bloom cannot wait to meet you.',
                   ),
-                ),
-                const SizedBox(height: 30),
+                  const SizedBox(height: 30),
 
-                // First Name
-                TextFormField(
-                  controller: _firstNameController,
-                  decoration: const InputDecoration(
-                    labelText: 'First Name',
-                    border: OutlineInputBorder(),
-                  ),
-                  validator: (val) =>
-                  val == null || val.isEmpty ? 'Required' : null,
-                ),
-                const SizedBox(height: 20),
-
-                // Last Name
-                TextFormField(
-                  controller: _lastNameController,
-                  decoration: const InputDecoration(
-                    labelText: 'Last Name',
-                    border: OutlineInputBorder(),
-                  ),
-                  validator: (val) =>
-                  val == null || val.isEmpty ? 'Required' : null,
-                ),
-                const SizedBox(height: 20),
-
-                // Email
-                TextFormField(
-                  controller: _emailController,
-                  decoration: const InputDecoration(
-                    labelText: 'Email',
-                    border: OutlineInputBorder(),
-                  ),
-                  validator: (val) {
-                    if (val == null || val.isEmpty) return 'Required';
-                    if (!val.contains('@')) return 'Invalid email';
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 20),
-
-                // Password
-                TextFormField(
-                  controller: _passwordController,
-                  obscureText: true,
-                  decoration: const InputDecoration(
-                    labelText: 'Password',
-                    border: OutlineInputBorder(),
-                  ),
-                  validator: (val) =>
-                  val == null || val.length < 6 ? 'Min 6 characters' : null,
-                ),
-                const SizedBox(height: 20),
-
-                // Role dropdown
-                DropdownButtonFormField<String>(
-                  initialValue: _selectedRole,
-                  items: const [
-                    DropdownMenuItem(value: 'student', child: Text('Student')),
-                    DropdownMenuItem(value: 'teacher', child: Text('Teacher')),
-                  ],
-                  onChanged: (val) {
-                    setState(() => _selectedRole = val ?? 'student');
-                  },
-                  decoration: const InputDecoration(
-                    labelText: 'Role',
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-
-                const SizedBox(height: 20),
-
-                // Class dropdown — ONLY for students
-                if (_selectedRole == 'student')
-                  _loadingClasses
-                      ? const CircularProgressIndicator()
-                      : DropdownButtonFormField<String>(
-                    initialValue: _selectedClassId,
-                    items: _classes
-                        .map<DropdownMenuItem<String>>(
-                          (c) => DropdownMenuItem<String>(
-                        value: c['id'] as String,
-                        child: Text(c['name'] as String),
-                      ),
-                    )
-                        .toList(),
-                    onChanged: (val) {
-                      setState(() => _selectedClassId = val);
-                    },
-                    decoration: const InputDecoration(
-                      labelText: 'Select Class',
-                      border: OutlineInputBorder(),
-                    ),
+                  // First Name
+                  TextFormField(
+                    controller: _firstNameController,
+                    decoration: authField('First name'),
                     validator: (val) =>
-                    val == null ? 'Please select a class' : null,
+                        val == null || val.isEmpty ? 'Required' : null,
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Last Name
+                  TextFormField(
+                    controller: _lastNameController,
+                    decoration: authField('Last name'),
+                    validator: (val) =>
+                        val == null || val.isEmpty ? 'Required' : null,
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Email
+                  TextFormField(
+                    controller: _emailController,
+                    keyboardType: TextInputType.emailAddress,
+                    decoration: authField('Email'),
+                    validator: (val) {
+                      if (val == null || val.isEmpty) return 'Required';
+                      if (!val.contains('@')) return 'Invalid email';
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Password
+                  TextFormField(
+                    controller: _passwordController,
+                    obscureText: true,
+                    decoration: authField('Password'),
+                    validator: (val) => val == null || val.length < 6
+                        ? 'Min 6 characters'
+                        : null,
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Role dropdown
+                  DropdownButtonFormField<String>(
+                    initialValue: _selectedRole,
+                    borderRadius: BorderRadius.circular(16),
+                    items: const [
+                      DropdownMenuItem(
+                          value: 'student', child: Text('Student')),
+                      DropdownMenuItem(
+                          value: 'teacher', child: Text('Teacher')),
+                    ],
+                    onChanged: (val) {
+                      setState(() => _selectedRole = val ?? 'student');
+                    },
+                    decoration: authField('Role'),
                   ),
 
-                const SizedBox(height: 30),
+                  const SizedBox(height: 16),
 
-                if (_message != null)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 10),
-                    child: Text(
-                      _message!,
-                      style: TextStyle(
-                        color: _message!.startsWith('Error')
-                            ? Colors.red
-                            : Colors.green,
-                        fontWeight: FontWeight.w600,
-                      ),
+                  // Class dropdown — ONLY for students
+                  if (_selectedRole == 'student')
+                    _loadingClasses
+                        ? const Padding(
+                            padding: EdgeInsets.symmetric(vertical: 12),
+                            child: CircularProgressIndicator(
+                              color: RRColor.mint,
+                            ),
+                          )
+                        : DropdownButtonFormField<String>(
+                            initialValue: _selectedClassId,
+                            borderRadius: BorderRadius.circular(16),
+                            items: _classes
+                                .map<DropdownMenuItem<String>>(
+                                  (c) => DropdownMenuItem<String>(
+                                    value: c['id'] as String,
+                                    child: Text(c['name'] as String),
+                                  ),
+                                )
+                                .toList(),
+                            onChanged: (val) {
+                              setState(() => _selectedClassId = val);
+                            },
+                            decoration: authField('Select class'),
+                            validator: (val) =>
+                                val == null ? 'Please select a class' : null,
+                          ),
+
+                  if (_message != null) ...[
+                    const SizedBox(height: 20),
+                    AuthMessage(
+                      text: _message!,
+                      isError: _message!.startsWith('Error') ||
+                          _message!.startsWith('Signup failed'),
                     ),
+                  ],
+
+                  const SizedBox(height: 26),
+
+                  AuthButton(
+                    label: 'Create account',
+                    loading: _isLoading,
+                    onPressed: _signUp,
                   ),
 
-                // Sign Up Button
-                SizedBox(
-                  width: double.infinity,
-                  height: 50,
-                  child: ElevatedButton(
-                    onPressed: _isLoading ? null : _signUp,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Color(AppConfig.primaryColor),
-                      foregroundColor: Colors.white,
-                      textStyle: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w600,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                    child: _isLoading
-                        ? const CircularProgressIndicator(color: Colors.white)
-                        : const Text('Sign Up'),
+                  const SizedBox(height: 10),
+
+                  AuthLink(
+                    label: 'Already have an account? Log in',
+                    onPressed: () =>
+                        Navigator.pushReplacementNamed(context, '/login'),
                   ),
-                ),
-
-                const SizedBox(height: 16),
-
-                TextButton(
-                  onPressed: () =>
-                      Navigator.pushReplacementNamed(context, '/login'),
-                  child: const Text('Already have an account? Log in'),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),

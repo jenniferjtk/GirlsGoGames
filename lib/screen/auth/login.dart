@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:readright/config/config.dart';
+
+import 'package:readright/config/theme.dart';
+import 'package:readright/widgets/auth_ui.dart';
+import 'package:readright/widgets/bloom_mascot.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -15,7 +18,7 @@ class _LoginPageState extends State<LoginPage> {
 
   bool _isLoading = false;
   String? _errorText;
-  bool _obscurePassword = true; // 👁️ Controls visibility of password
+  bool _obscurePassword = true; // Controls visibility of password
 
   Future<void> _login() async {
     final email = _emailController.text.trim();
@@ -74,110 +77,71 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 32),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                Icons.lock_open,
-                size: 80,
-                color: Color(AppConfig.primaryColor),
-              ),
-              const SizedBox(height: 20),
-              Text(
-                'Sign In',
-                style: TextStyle(
-                  fontSize: 26,
-                  fontWeight: FontWeight.bold,
-                  color: Color(AppConfig.secondaryColor),
+      backgroundColor: RRColor.canvas,
+      body: SafeArea(
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 32),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const AuthHeader(
+                  mood: BloomMood.happy,
+                  badge: Icons.menu_book_rounded,
+                  badgeColor: RRColor.mint,
+                  title: 'Welcome back!',
+                  subtitle: 'Bloom has been reading without you.',
                 ),
-              ),
-              const SizedBox(height: 30),
-              TextField(
-                controller: _emailController,
-                decoration: const InputDecoration(
-                  labelText: 'Email',
-                  border: OutlineInputBorder(),
+                const SizedBox(height: 30),
+                TextField(
+                  controller: _emailController,
+                  keyboardType: TextInputType.emailAddress,
+                  decoration: authField('Email'),
                 ),
-              ),
-              const SizedBox(height: 20),
-              TextField(
-                controller: _passwordController,
-                obscureText: _obscurePassword,
-                decoration: InputDecoration(
-                  labelText: 'Password',
-                  border: const OutlineInputBorder(),
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      _obscurePassword
-                          ? Icons.visibility_off
-                          : Icons.visibility,
-                    ),
-                    onPressed: () {
-                      setState(() {
-                        _obscurePassword = !_obscurePassword;
-                      });
-                    },
-                  ),
-                ),
-              ),
-              const SizedBox(height: 30),
-              if (_errorText != null)
-                Text(
-                  "Incorrect login information.",
-                  style: const TextStyle(color: Colors.red),
-                ),
-              const SizedBox(height: 10),
-              SizedBox(
-                width: double.infinity,
-                height: 50,
-                child: ElevatedButton(
-                  onPressed: _isLoading ? null : _login,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Color(AppConfig.primaryColor),
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: _passwordController,
+                  obscureText: _obscurePassword,
+                  decoration: authField(
+                    'Password',
+                    suffixIcon: IconButton(
+                      color: RRColor.inkSoft,
+                      icon: Icon(
+                        _obscurePassword
+                            ? Icons.visibility_off_rounded
+                            : Icons.visibility_rounded,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          _obscurePassword = !_obscurePassword;
+                        });
+                      },
                     ),
                   ),
-                  child: _isLoading
-                      ? const CircularProgressIndicator(color: Colors.white)
-                      : const Text(
-                          'Login',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
                 ),
-              ),
-              const SizedBox(height: 16),
-              TextButton(
-                onPressed: () =>
-                    Navigator.pushReplacementNamed(context, '/signup'),
-                child: const Text(
-                  "Don't have an account? Sign up",
-                  style: TextStyle(
-                    fontSize: 18,
-                    color: Color(0xFF2E7D32),
-                  ),
+                if (_errorText != null) ...[
+                  const SizedBox(height: 18),
+                  const AuthMessage(text: 'Incorrect login information.'),
+                ],
+                const SizedBox(height: 26),
+                AuthButton(
+                  label: 'Log in',
+                  loading: _isLoading,
+                  onPressed: _login,
                 ),
-              ),
-              const SizedBox(height: 16),
-              TextButton(
-                onPressed: () =>
-                    Navigator.pushReplacementNamed(context, '/resetPassword'),
-                child: const Text(
-                  'Forgot your password? Reset here',
-                  style: TextStyle(
-                    fontSize: 18,
-                    color: Color(0xFF2E7D32),
-                  ),
+                const SizedBox(height: 10),
+                AuthLink(
+                  label: "Don't have an account? Sign up",
+                  onPressed: () =>
+                      Navigator.pushReplacementNamed(context, '/signup'),
                 ),
-              ),
-            ],
+                AuthLink(
+                  label: 'Forgot your password? Reset here',
+                  onPressed: () =>
+                      Navigator.pushReplacementNamed(context, '/resetPassword'),
+                ),
+              ],
+            ),
           ),
         ),
       ),
