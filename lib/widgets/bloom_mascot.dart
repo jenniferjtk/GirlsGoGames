@@ -24,6 +24,10 @@ enum BloomMood {
   /// List complete. Open mouth, sparkles, leaf lifted.
   cheer,
 
+  /// Wrong answer. Asymmetric eyes, wavy mouth, leaf tipped over. Puzzled, not
+  /// sad — Bloom is confused about the word, never disappointed in the child.
+  confused,
+
   /// Loading. Closed eyes.
   sleepy,
 }
@@ -65,9 +69,10 @@ class _BloomPainter extends CustomPainter {
       Paint()..color = RRColor.lilac.withOpacity(0.45),
     );
 
-    // Stem + leaf. Lifts on cheer.
+    // Stem + leaf. Lifts on cheer, tips over on confused.
     final lift = mood == BloomMood.cheer ? -r * 0.12 : 0.0;
-    final stemTop = Offset(cx + r * 0.06, cy - r * 1.02 + lift);
+    final tilt = mood == BloomMood.confused ? r * 0.34 : 0.0;
+    final stemTop = Offset(cx + r * 0.06 + tilt, cy - r * 1.02 + lift + tilt * 0.4);
     canvas.drawLine(
       Offset(cx, cy - r * 0.85),
       stemTop,
@@ -140,6 +145,26 @@ class _BloomPainter extends CustomPainter {
           );
         }
         break;
+      case BloomMood.confused:
+        // One wide eye, one squint. Asymmetry is what reads as 'puzzled' —
+        // two identical sad eyes would read as 'told off'.
+        canvas.drawCircle(
+            Offset(cx - eyeDx, eyeY), eyeR * 1.15, Paint()..color = RRColor.ink);
+        canvas.drawCircle(
+            Offset(cx - eyeDx + eyeR * 0.3, eyeY - eyeR * 0.4),
+            eyeR * 0.34,
+            Paint()..color = Colors.white);
+        canvas.drawArc(
+          Rect.fromCenter(
+              center: Offset(cx + eyeDx, eyeY + eyeR * 0.3),
+              width: eyeR * 2.4,
+              height: eyeR * 1.8),
+          math.pi,
+          math.pi,
+          false,
+          facePaint,
+        );
+        break;
       case BloomMood.idle:
         for (final dx in [-eyeDx, eyeDx]) {
           canvas.drawCircle(
@@ -165,7 +190,15 @@ class _BloomPainter extends CustomPainter {
 
     // Mouth
     final mouthY = cy + r * 0.30;
-    if (mood == BloomMood.cheer) {
+    if (mood == BloomMood.confused) {
+      // A wavy mouth: not a frown. Bloom is working the word out too.
+      final w2 = r * 0.46;
+      final path = Path()..moveTo(cx - w2 / 2, mouthY);
+      path.quadraticBezierTo(cx - w2 * 0.25, mouthY - r * 0.14, cx, mouthY);
+      path.quadraticBezierTo(
+          cx + w2 * 0.25, mouthY + r * 0.14, cx + w2 / 2, mouthY - r * 0.02);
+      canvas.drawPath(path, facePaint);
+    } else if (mood == BloomMood.cheer) {
       final mouth = Rect.fromCenter(
           center: Offset(cx, mouthY), width: r * 0.44, height: r * 0.50);
       canvas.drawArc(mouth, 0, math.pi, true, Paint()..color = RRColor.blossomInk);
