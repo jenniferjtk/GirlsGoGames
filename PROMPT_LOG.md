@@ -512,3 +512,23 @@ Rejected to redesign
 
 Testing and Verification:
 Walk through the proposed flow fromt he perspective of the intended audience
+
+# Entry 23: UX/UI Anaylsis Changes (tool: Gemini, 7/27/26) [Karina]
+
+Context:
+Based on the same context and conversation as Entry 22
+
+Prompt Excerpt:
+Based on all the agreements and changes i listed, generate the code for the following pages: main, student dashboard, games
+
+AI Summary:
+Generated changes based on prompt, created a mascot to be in the app and changed the color palette.
+
+Human Evaluation:
+The AI code did not work in the program. The code highlighted some issues with wordlist, and at times broke the async.
+
+Final Decision:
+Rejected and refreshing conversation and prompt method.
+
+Testing and Verification:
+Paste each code change by file, and test all button smashing, and ux intentions
