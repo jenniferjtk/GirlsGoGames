@@ -1,0 +1,211 @@
+// lib/widgets/bloom_mascot.dart
+//
+// Bloom — a sprout that hatched. Round mint body, one leaf, no limbs.
+//
+// Drawn entirely in CustomPaint: no asset, no pubspec entry, pixel-identical
+// in Chrome and on the Pixel 6, and it scales to any size without a 3x export.
+//
+// Bloom's job is to carry state that a pre-reader cannot get from text. Mood is
+// the only prop that matters: it is how the screen says "you're doing well"
+// without writing "you're doing well".
+
+import 'dart:math' as math;
+
+import 'package:flutter/material.dart';
+import 'package:readright/config/theme.dart';
+
+enum BloomMood {
+  /// Nothing learned yet, or waiting. Neutral, eyes open.
+  idle,
+
+  /// Some progress. Curved eyes, small smile.
+  happy,
+
+  /// List complete. Open mouth, sparkles, leaf lifted.
+  cheer,
+
+  /// Loading. Closed eyes.
+  sleepy,
+}
+
+class BloomMascot extends StatelessWidget {
+  final double size;
+  final BloomMood mood;
+
+  const BloomMascot({super.key, required this.size, this.mood = BloomMood.idle});
+
+  @override
+  Widget build(BuildContext context) {
+    return ExcludeSemantics(
+      child: SizedBox(
+        width: size,
+        height: size,
+        child: CustomPaint(painter: _BloomPainter(mood)),
+      ),
+    );
+  }
+}
+
+class _BloomPainter extends CustomPainter {
+  final BloomMood mood;
+
+  _BloomPainter(this.mood);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final w = size.width;
+    final h = size.height;
+    final cx = w / 2;
+    final cy = h * 0.56;
+    final r = w * 0.34;
+
+    // Ground shadow — anchors Bloom so it doesn't float.
+    canvas.drawOval(
+      Rect.fromCenter(center: Offset(cx, cy + r * 1.02), width: r * 1.5, height: r * 0.26),
+      Paint()..color = RRColor.lilac.withOpacity(0.45),
+    );
+
+    // Stem + leaf. Lifts on cheer.
+    final lift = mood == BloomMood.cheer ? -r * 0.12 : 0.0;
+    final stemTop = Offset(cx + r * 0.06, cy - r * 1.02 + lift);
+    canvas.drawLine(
+      Offset(cx, cy - r * 0.85),
+      stemTop,
+      Paint()
+        ..color = RRColor.mintInk
+        ..strokeWidth = r * 0.11
+        ..strokeCap = StrokeCap.round,
+    );
+
+    final leaf = Path()
+      ..moveTo(stemTop.dx, stemTop.dy)
+      ..quadraticBezierTo(
+          stemTop.dx + r * 0.52, stemTop.dy - r * 0.34, stemTop.dx + r * 0.60, stemTop.dy + r * 0.12)
+      ..quadraticBezierTo(
+          stemTop.dx + r * 0.30, stemTop.dy + r * 0.26, stemTop.dx, stemTop.dy);
+    canvas.drawPath(leaf, Paint()..color = RRColor.mint);
+
+    // Body
+    canvas.drawCircle(Offset(cx, cy), r, Paint()..color = RRColor.mintGlow);
+    // Belly highlight, offset low-left so the form reads as round.
+    canvas.drawOval(
+      Rect.fromCenter(
+          center: Offset(cx, cy + r * 0.22), width: r * 1.32, height: r * 1.10),
+      Paint()..color = Colors.white.withOpacity(0.55),
+    );
+    canvas.drawCircle(
+      Offset(cx, cy),
+      r,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = r * 0.09
+        ..color = RRColor.mintInk,
+    );
+
+    // Face
+    final eyeY = cy - r * 0.12;
+    final eyeDx = r * 0.36;
+    final eyeR = r * 0.115;
+    final facePaint = Paint()
+      ..color = RRColor.ink
+      ..strokeWidth = r * 0.10
+      ..strokeCap = StrokeCap.round
+      ..style = PaintingStyle.stroke;
+
+    switch (mood) {
+      case BloomMood.sleepy:
+        for (final dx in [-eyeDx, eyeDx]) {
+          canvas.drawArc(
+            Rect.fromCenter(
+                center: Offset(cx + dx, eyeY), width: eyeR * 2.6, height: eyeR * 2.0),
+            0,
+            math.pi,
+            false,
+            facePaint,
+          );
+        }
+        break;
+      case BloomMood.happy:
+      case BloomMood.cheer:
+        for (final dx in [-eyeDx, eyeDx]) {
+          canvas.drawArc(
+            Rect.fromCenter(
+                center: Offset(cx + dx, eyeY + eyeR * 0.5),
+                width: eyeR * 2.6,
+                height: eyeR * 2.2),
+            math.pi,
+            math.pi,
+            false,
+            facePaint,
+          );
+        }
+        break;
+      case BloomMood.idle:
+        for (final dx in [-eyeDx, eyeDx]) {
+          canvas.drawCircle(
+              Offset(cx + dx, eyeY), eyeR, Paint()..color = RRColor.ink);
+          canvas.drawCircle(Offset(cx + dx + eyeR * 0.3, eyeY - eyeR * 0.35),
+              eyeR * 0.32, Paint()..color = Colors.white);
+        }
+        break;
+    }
+
+    // Cheeks
+    if (mood != BloomMood.sleepy) {
+      for (final dx in [-r * 0.60, r * 0.60]) {
+        canvas.drawOval(
+          Rect.fromCenter(
+              center: Offset(cx + dx, eyeY + r * 0.30),
+              width: r * 0.32,
+              height: r * 0.22),
+          Paint()..color = RRColor.blossomGlow.withOpacity(0.75),
+        );
+      }
+    }
+
+    // Mouth
+    final mouthY = cy + r * 0.30;
+    if (mood == BloomMood.cheer) {
+      final mouth = Rect.fromCenter(
+          center: Offset(cx, mouthY), width: r * 0.44, height: r * 0.50);
+      canvas.drawArc(mouth, 0, math.pi, true, Paint()..color = RRColor.blossomInk);
+    } else if (mood == BloomMood.sleepy) {
+      canvas.drawArc(
+        Rect.fromCenter(
+            center: Offset(cx, mouthY), width: r * 0.28, height: r * 0.24),
+        0,
+        math.pi,
+        false,
+        facePaint,
+      );
+    } else {
+      canvas.drawArc(
+        Rect.fromCenter(
+            center: Offset(cx, mouthY - r * 0.06), width: r * 0.46, height: r * 0.40),
+        math.pi * 0.15,
+        math.pi * 0.70,
+        false,
+        facePaint,
+      );
+    }
+
+    // Sparkles on cheer only — the reward has to look different, not just say so.
+    if (mood == BloomMood.cheer) {
+      final spark = Paint()
+        ..color = RRColor.sunny
+        ..strokeWidth = r * 0.08
+        ..strokeCap = StrokeCap.round;
+      void star(Offset c, double s) {
+        canvas.drawLine(Offset(c.dx - s, c.dy), Offset(c.dx + s, c.dy), spark);
+        canvas.drawLine(Offset(c.dx, c.dy - s), Offset(c.dx, c.dy + s), spark);
+      }
+
+      star(Offset(cx - r * 1.15, cy - r * 0.55), r * 0.20);
+      star(Offset(cx + r * 1.18, cy - r * 0.20), r * 0.15);
+      star(Offset(cx + r * 0.95, cy - r * 0.95), r * 0.11);
+    }
+  }
+
+  @override
+  bool shouldRepaint(_BloomPainter old) => old.mood != mood;
+}

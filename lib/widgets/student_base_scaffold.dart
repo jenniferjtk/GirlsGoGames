@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-import 'package:readright/config/config.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+
+import 'package:readright/config/theme.dart';
 import 'package:readright/widgets/student_navbar.dart';
 
 import '../providers/theme_provider.dart';
-
 
 class StudentBaseScaffold extends StatelessWidget {
   final Widget body;
@@ -26,33 +27,44 @@ class StudentBaseScaffold extends StatelessWidget {
     final themeProvider = Provider.of<ThemeProvider>(context);
 
     return Scaffold(
+      backgroundColor: RRColor.canvas,
       appBar: AppBar(
-        backgroundColor: Color(AppConfig.primaryColor),
+        backgroundColor: RRColor.mint,
+        elevation: 0,
+        toolbarHeight: 68,
         iconTheme: const IconThemeData(color: Colors.white),
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(bottom: Radius.circular(24)),
+        ),
         title: Row(
           children: [
-            Icon(pageIcon, color: Colors.white),
-            const SizedBox(width: 8),
+            Icon(pageIcon, color: Colors.white, size: 28),
+            const SizedBox(width: 10),
             Text(
               pageTitle,
               style: const TextStyle(
+                fontFamily: RRFont.display,
+                fontSize: 24,
+                fontWeight: FontWeight.w800,
                 color: Colors.white,
-                fontWeight: FontWeight.bold,
               ),
             ),
           ],
         ),
-
-        // Logout button
         actions: [
           IconButton(
-            icon: themeProvider.isDarkMode ? const Icon(Icons.light_mode, color: Colors.white) : const Icon(Icons.dark_mode, color: Colors.white),
+            iconSize: 26,
+            icon: themeProvider.isDarkMode
+                ? const Icon(Icons.light_mode, color: Colors.white)
+                : const Icon(Icons.dark_mode, color: Colors.white),
             tooltip: 'Dark mode',
             onPressed: () async {
+              HapticFeedback.selectionClick();
               themeProvider.toggleTheme();
             },
           ),
           IconButton(
+            iconSize: 26,
             icon: const Icon(Icons.logout, color: Colors.white),
             tooltip: 'Logout',
             onPressed: () async {
@@ -66,17 +78,21 @@ class StudentBaseScaffold extends StatelessWidget {
                 Navigator.pushNamedAndRemoveUntil(
                   context,
                   '/login',
-                      (route) => false,
+                  (route) => false,
                 );
               }
             },
           ),
+          const SizedBox(width: 4),
         ],
       ),
       body: body,
       bottomNavigationBar: StudentNavBar(
         currentIndex: currentIndex,
         onTap: (index) {
+          if (index == currentIndex) return;
+          HapticFeedback.mediumImpact();
+          SystemSound.play(SystemSoundType.click);
           switch (index) {
             case 0:
               Navigator.pushReplacementNamed(context, '/studentDashboard');
@@ -86,9 +102,6 @@ class StudentBaseScaffold extends StatelessWidget {
               break;
             case 2:
               Navigator.pushReplacementNamed(context, '/wordlist');
-              break;
-            case 3:
-              Navigator.pushReplacementNamed(context, '/progress');
               break;
             default:
               Navigator.pushReplacementNamed(context, '/studentDashboard');
