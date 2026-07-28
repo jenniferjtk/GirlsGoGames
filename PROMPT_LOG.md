@@ -473,7 +473,7 @@ Accepted after fixing backend errors
 Testing and Verification:
 Ran node server.js and flutter run, generated multiple stories, and confirmed they displayed correctly
 
-# Entry 22: AI Story Builder Tests (tool: ChatGPT, 7/26/26) [Kathleen]
+# Entry 21: AI Story Builder Tests (tool: ChatGPT, 7/26/26) [Kathleen]
 
 Context:
 Making tests for the new Teacher Story Builder
@@ -492,3 +492,23 @@ Accepted with minor changes
 
 Testing and Verification:
 Ran flutter test then flutter run opened the teacher story builder and confirmed the page loaded and stories still generated correctly
+
+# Entry 22: UX/UI Anaylsis (tool: Gemini, 7/27/26) [Karina]
+
+Context:
+the overarching goal is to teach children speaking, reading, and listening Dolch sight words through practice modes, interactive games, visual progress tracking, and a teacher-gated AI story generator. The key UX objective is to enable independent navigation for non-reading children via large touch targets, emojis, haptic feedback, and a streamlined "Action Center" navigation model using an accessible, playful pastel palette (#81F4E1, #56CBF9, #FF729F, #D3C4D1). The strict non-goal is to avoid altering any underlying backend logic, Supabase operations, or state management procedures, focusing purely on UX/UI enhancements. Identified risks include cognitive friction from text-heavy layouts and redundant navigation paths, which are mitigated by gutting unnecessary text, stripping redundant buttons, and flattening the screen flow while ensuring strict accessibility standards and keeping advanced tools securely behind teacher profiles.
+
+Prompt Excerpt:
+"act as an expert mobile app ux/ui designer. i will give you different flutter screens and you will adjust which to better fit the intended client. your non-goal is to change any of the actual procedures, just the ux and ui. the intended app is called "readright"; it is an app made for teachers and student between pre-primeir and third grade. the goal of the app is to teach children speaking,reading,and listening dolch sight words, through practice, a game, ai story generator (story generation is locked behind teacher profile), and visual progress. since this is a class project, the primary devices is vs code chrome & pixel 6 with android simulator. it is locked to portrait for the sake of scope. the intended color palette is some variation of white,#81F4E1, #56cbf9, #ff729f,#d3c4d1 but with colors that work with accessbility and saturation for children. take creative liberty for tyopgraphy, mascot/theme. make it playful, but still professional. the children are intended to navigate the practice and game modes independdetly. so make sure the font is large, there is tactile feedback, haptic sounds, and icons/emojis to help them navigate. you are able to take artictic liberties in changing the layout (for example combining or seperating screens) as long as you justify your position and ask for permission first.first, go over the intended flow and see where adjusts can be made to the layout. code: (pasted)"
+
+AI Summary:
+Proposed some changes from UI to UX (ie. changing word to more child firendly, decreasing descripitons). 
+
+Human Evaluation:
+The proposed changed gave me more insight into the ux which prompted more questions.Pivoted to answering my UX design questions and redesign the app before moving on.
+
+Final Decision:
+Rejected to redesign
+
+Testing and Verification:
+Walk through the proposed flow fromt he perspective of the intended audience
